@@ -1,0 +1,108 @@
+<div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd #custom_layout# #eqLogic_class# #class# #category#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width: #width#;height: #height#;#style#">
+  <div class="widget-name">
+    <span style="color:#background-color#" title="#alert_name#">
+      <i class='#alert_icon#'></i>
+    </span>
+    <span class="cmd actionDelete pull-left cursor #trashed#" data-cmd_id="#delete_id#">
+      <i class="fas fa-trash"></i>
+    </span>
+    <span class="cmd refresh pull-right cursor" data-cmd_id="#refresh_id#">
+      <i class="fas fa-sync"></i>
+    </span>
+    <span class="panelLink pull-left cursor">
+      <a href="#panelLink#"><i class="fas fa-external-link-alt"></i></a>
+    </span>
+    <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+    <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
+    <span class="cmd actionPin pull-right cursor #pinned#" data-cmd_id="#pin_id#">
+      <i class="fas fa-map-pin"></i>
+    </span>
+    <span class="cmd actionArchive pull-right cursor #archived#" data-cmd_id="#archive_id#">
+      <i class="fas fa-archive"></i>
+    </span>
+  </div>
+  <div class="cmds #isVerticalAlign#">
+    #cmd#
+  </div>
+  #divGraphInfo#
+  <style>
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-map-pin,
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-archive,
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-trash {
+        margin-top: 5px !important;
+        font-size: 14px !important;
+    	color: var(--eqTitle-color) !important;
+    }
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-map-pin,
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-archive {
+        margin-right: 7%;
+    }
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-trash {
+        margin-left: 10px;
+    }
+    .eqLogic[data-eqLogic_uid="#uid#"] span.isPinned i.fa-map-pin,
+    .eqLogic[data-eqLogic_uid="#uid#"] span.isArchived i.fa-archive {
+    	color: gold !important;
+    }
+    .eqLogic[data-eqLogic_uid="#uid#"] span.isTrashed i.fa-trash {
+    	color: red !important;
+    }
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-map-pin:hover,
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-archive:hover,
+    .eqLogic[data-eqLogic_uid="#uid#"] i.fa-trash:hover {
+        color: var(--linkHoverLight-color) !important;
+        opacity: .65;
+    }
+  </style>
+  <script>
+    if ('#panelLink#' == '') {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .panelLink')?.remove()
+    }
+    if ('#delete_id#' != '' && '#restore_id#' != '') {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete')?.addEventListener('click', function() {
+        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').hasClass('isTrashed')) {
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').removeClass('isTrashed')
+            jeedom.cmd.execute({ id: '#restore_id#' })
+        } else {
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').addClass('isTrashed')
+            jeedom.cmd.execute({ id: '#delete_id#' })
+        }
+      })
+    } else {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive')?.remove()
+    }
+    if ('#refresh_id#' != '') {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .refresh')?.addEventListener('click', function() {
+        jeedom.cmd.execute({ id: '#refresh_id#' })
+      })
+    } else {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .refresh')?.remove()
+    }
+    if ('#pin_id#' != '' && '#unpin_id#' != '') {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin')?.addEventListener('click', function() {
+        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').hasClass('isPinned')) {
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').removeClass('isPinned')
+            jeedom.cmd.execute({ id: '#unpin_id#' })
+        } else {
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').addClass('isPinned')
+            jeedom.cmd.execute({ id: '#pin_id#' })
+        }
+      })
+    } else {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin')?.remove()
+    }
+    if ('#archive_id#' != '' && '#unarchiveid#' != '') {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive')?.addEventListener('click', function() {
+        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').hasClass('isArchived')) {
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').removeClass('isArchived')
+            jeedom.cmd.execute({ id: '#unarchiveid#' })
+        } else {
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').addClass('isArchived')
+            jeedom.cmd.execute({ id: '#archive_id#' })
+        }
+      })
+    } else {
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive')?.remove()
+    }
+  </script>
+</div>

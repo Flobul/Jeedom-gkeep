@@ -1,0 +1,200 @@
+<div class="cmd cmd-widget" data-type="action" data-subtype="message" data-template="default" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-order="#order#" data-eqLogic_id="#eqLogic_id#" draggable=true>
+    <div class="content-xs checkBoxList">
+        <a class="clickPlus">
+            <span>
+                <i class="icon kiko-plus"></i>
+            </span>
+            <strong>{{Élément de liste}}</strong>
+        </a>
+        <span class="hiddenAddItem">
+            <span>
+                <input type="checkbox" class="checkBox">
+            </span> 
+            <strong class="state" contenteditable="true"></strong>
+            <span>
+                <a class="clickRemove" title="{{Annuler}}"><i class="fas fa-times"></i></a>
+                <a class="clickSend" title="{{Ajouter l'item}}"><i class="icon kiko-check"></i></a>
+            </span>
+        </span>
+    </div>
+    <style>
+      .cmd[data-cmd_uid="#uid#"] .dragging {
+          opacity: .5;
+      }
+      .cmd[data-cmd_uid="#uid#"] .checkBoxList {
+          display: block;
+          width: 200px;
+          text-align:left;
+      }
+      .cmd[data-cmd_uid="#uid#"] .checkBoxList {
+          opacity: .5;
+      }
+      .clickRemove {
+          font-size: 1.3em;
+          float: right;
+          margin-right: 10px;
+      }
+      .clickSend {
+          font-size: 1.3em;
+          float: right;
+          margin-right: 5px;
+      }
+      .clickRemove i {
+          color: red;
+      }
+      .clickSend i {
+          color: green;
+      }
+      .clickRemove:hover, .clickSend:hover{
+          opacity: .6;
+      }
+      .hiddenAddItem {
+          display: none;
+      }
+      .checkBoxList .clickPlus strong {
+          margin-left: 10px;
+      }
+      .checkBoxList:has(.clickPlus)  {
+          margin-bottom: 10px;
+      }
+      .clickPlus::after {
+        content: "";
+        display: block;
+        height: 1px;
+        background-color: grey;
+        margin-top: 5px;
+      }
+    </style>
+    <template></template>
+    <script>
+      jeedom.cmd.addUpdateFunction('#id#',function(_options) {
+        if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+          cmd.querySelector('.state').empty().append(_options.display_value+' #unite#')
+          if ('#checked#' && '#checked#' != '#' + 'checked#') {
+              cmd.querySelector('.checkBox').checked = true;
+              cmd.querySelector('.state').style.textDecoration = 'line-through';
+          } else {
+              cmd.querySelector('.checkBox').checked = false;
+              cmd.querySelector('.state').style.textDecoration = 'none';
+          }
+          if (_options.alertLevel) {
+            if (_options.alertLevel == 'warning') {
+              cmd.addClass('label label-warning')
+              cmd.setAttribute('data-alertlevel','warning')
+            } else if (_options.alertLevel == 'danger') {
+              cmd.addClass('label label-danger')
+              cmd.setAttribute('data-alertlevel','danger')
+            } else {
+              cmd.removeClass('label label-warning label-danger')
+              cmd.setAttribute('data-alertlevel','none')
+            }
+          }
+        }
+      });
+      jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}])
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .state').addEventListener('keydown', function(event) {
+        console.log('keydown',event)
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          addItem#id#({text: document.querySelector('.cmd[data-cmd_uid=#uid#] .state').innerText});
+        }
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .state').innerText = '';
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .hiddenAddItem').style.display = "none";
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .clickPlus').style.display = "contents";
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .checkBoxList').style.opacity = .5;
+        }
+      });
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .state').addEventListener('blur', function(event) {
+        console.log('blur',event)
+          if (event.target.innerText != '' && event.target.innerText != '#state#') {
+              //addItem#id#({text: event.target.innerText});
+          }
+      });
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragstart', function(event) {
+        console.log('dragstart');
+          event.dataTransfer.setData('text/plain', event.target.dataset.id);
+          document.querySelector('.cmd[data-cmd_uid=#uid#]').classList.add('dragging');
+      })
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragover', function(event) {
+        console.log('dragover');
+        event.preventDefault();
+        var draggingElement = document.querySelector('.dragging');
+        var targetElement = event.target;
+
+        if (!draggingElement.contains(targetElement)) {
+          var containerElement = targetElement.parentElement;
+
+          containerElement.insertBefore(draggingElement, targetElement);
+        }
+      })
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragend', function(event) {
+        console.log('dragend');
+         document.querySelector('.cmd[data-cmd_uid=#uid#]').classList.remove('dragging');
+      });
+
+      function addItem#id#(_change) {
+        document.getElementById('div_jeedomLoading').style.display = 'none';
+        $.ajax({
+          type: "POST",
+          url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
+          data: {
+            action: "addItem",
+            eqLogic_id: "#eqLogic_id#",
+            cmd_id: "#id#",
+            item_id: "#keepId#",
+            change: _change
+          },
+          dataType: 'json',
+          error: function(request, status, error) {
+            handleAjaxError(request, status, error);
+          },
+          success: function(data) {
+            if (data.state != 'ok') {
+              $.fn.showAlert({
+                message: data.result,
+                level: 'danger'
+              });
+              return;
+            }
+            if (data.code == 0) {
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .state').innerText = '';
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .hiddenAddItem').style.display = "none";
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .clickPlus').style.display = "contents";
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .checkBoxList').style.opacity = .5;
+            }
+          }
+        })
+      }
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .clickPlus').addEventListener('click', function(event) {
+          event.stopPropagation();
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .checkBoxList').style.opacity = 1;
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .hiddenAddItem').style.display = "contents";
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .clickPlus').style.display = "none";
+          var stateElement = document.querySelector('.cmd[data-cmd_uid=#uid#] .state');
+          stateElement.focus();
+          stateElement.selectionStart = 0;
+          stateElement.selectionEnd = 0;
+      });
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .clickRemove').addEventListener('click', function(event) {
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .hiddenAddItem').style.display = "none";
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .clickPlus').style.display = "contents";
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .checkBoxList').style.opacity = .5;
+      });
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .clickSend').addEventListener('click', function(event) {
+          addItem#id#({text: document.querySelector('.cmd[data-cmd_uid=#uid#] .state').innerText});
+      });
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .state').addEventListener('input', function(event) {
+        var text = event.target.innerText;
+        document.querySelector('.cmd[data-cmd_uid=#uid#] .clickSend').style.display = text.trim() !== '' ? 'block' : 'none';
+      });
+
+
+    </script>
+</div>

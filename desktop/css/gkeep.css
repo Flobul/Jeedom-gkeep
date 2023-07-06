@@ -1,0 +1,46 @@
+.eqLogicThumbnailDisplay .eqLogicThumbnailContainer .fas.fa-sign-in-alt.fa-rotate-90 {
+    font-size: 38px !important;
+    color: #63edc2;
+}
+
+.fas.fa-question-circle.tooltips.tooltipstered {
+    color: var(--al-info-color) !important;
+}
+
+.eqLogicDisplayCard.cursor:hover {
+    opacity:.65 !important;
+}
+
+.eqLogicDisplayCard.cursor .status-circle {
+    font-size:1em !important;
+    position:absolute;
+    margin-top:35px;
+    margin-left:55px;
+}
+
+
+.eqLogicThumbnailDisplay .panel-title {
+    background-color: #fbbc04;
+    border-radius: 10px;
+}
+
+.logoPrimaryGkeep {
+    color: #fbbc04;
+}
+
+.logoPrimaryGkeep .fas {
+    background-color: #fbbc04;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.logoTrashGkeep[data-action2=all] {
+    color: var(--al-danger-color);
+}
+
+#accordiongkeep {
+    color: white !important;
+}
+#accordiongkeep:hover {
+    opacity: .65
+}
