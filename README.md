@@ -1,2 +1,4 @@
-# Jeedom-VeSync
-Récupérer les informations de ses appareils et les piloter depuis le compte VeSync.
+# Jeedom-gkeep
+Synchronise ses notes depuis Google Keep.
+Et crée un équipement par note.
+Prend en compte l'ordre, les cases des items.
