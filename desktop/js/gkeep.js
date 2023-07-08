@@ -219,6 +219,13 @@ function printEqLogic(_eqLogic) {
   })
 }
 
+$('#bt_addgkeep').on('click', function() {
+  $('#md_modal').dialog({
+    title: "{{Ajouter une note Google Keep}}"
+  });
+  $('#md_modal').load('index.php?v=d&plugin=gkeep&modal=addNote').dialog('open');
+});
+
 $('#bt_synchronizegkeep').on('click', function() {
   synchronize();
 });

@@ -34,6 +34,10 @@
     -webkit-text-fill-color: transparent;
 }
 
+.logoSecondaryGkeep[id="bt_addgkeep"] {
+    color: var(--al-success-color);
+}
+
 .logoTrashGkeep[data-action2=all] {
     color: var(--al-danger-color);
 }

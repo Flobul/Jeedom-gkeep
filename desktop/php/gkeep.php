@@ -35,6 +35,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
         <?php
           gkeep_display::displayActionCard('{{Synchronisation}}', 'fa-sync', 'id="bt_synchronizegkeep"', 'eqLogicAction logoPrimaryGkeep');
+          gkeep_display::displayActionCard('{{Ajouter}}', 'fa-folder-plus', 'id="bt_addgkeep"', 'eqLogicAction logoSecondaryGkeep');
           gkeep_display::displayActionCard('{{Configuration}}', 'fa-wrench', 'data-action="gotoPluginConf"', 'logoSecondary');
           gkeep_display::displayActionCard('{{Santé}}', 'fa-medkit', 'id="bt_healthgkeep"', 'logoSecondary');
           gkeep_display::displayActionCard('{{Documentation}}', 'fa-book-reader', 'id="bt_documentationgkeep" data-location="' . $plugin->getDocumentation() . '"', 'logoSecondary');

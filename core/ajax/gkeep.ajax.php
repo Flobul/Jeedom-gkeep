@@ -102,6 +102,11 @@ try {
         }
         ajax::success($eqLogic->updateNote(init('change')));
     }
+  
+    if (init('action') == 'addNote') {
+        ajax::success(gkeep::addNote(init('object')));
+    }
+  
 	throw new Exception('Aucune methode correspondante');
 	/*     * *********Catch exeption*************** */
 } catch (Exception $e) {

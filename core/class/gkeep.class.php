@@ -22,7 +22,7 @@ require_once __DIR__ . "/../../../../core/php/core.inc.php";
 class gkeep extends eqLogic
 {
     /*     * *************************Attributs****************************** */
-    public static $_pluginVersion = '0.70';
+    public static $_pluginVersion = '0.80';
     public static $_widgetPossibility = array(
         'custom' => true,'parameters' => array(
 			'colorWidgetName' => array(
@@ -532,6 +532,30 @@ class gkeep extends eqLogic
         $cmd .= isset($_change['labels']) ? ' --labels "' . $_change['labels'] . '"' : '';
         $cmd .= isset($_change['annotations']) ? ' --annotations "' . $_change['annotations'] . '"' : '';
         $cmd .= isset($_change['collaborators']) ? ' --collaborators "' . $_change['collaborators'] . '"' : '';
+        $return = self::sendCmdAndFormatResult($cmd);
+        $this->refresh();
+        return $return;
+    }
+
+    public function addNote($_object)
+    {
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+        $cmd .= ' --username ' . config::byKey('email', 'gkeep') . ' create_note';
+        $cmd .= isset($_object['text']) ? ' --text "' . str_replace('"', '\"', $_object['text']) . '"' : '';
+        $cmd .= isset($_object['title']) ? ' --title "' . $_object['title'] . '"' : '';
+        $cmd .= isset($_object['color']) ? ' --color "' . $_object['color'] . '"' : '';
+        $cmd .= isset($_object['labels']) ? ' --labels "' . $_object['labels'] . '"' : '';
+        $cmd .= isset($_object['archived']) ? ($_object['archived'] ? ' --archived' : ' --unarchived') : '';
+        $cmd .= isset($_object['pinned']) ? ($_object['pinned'] ? ' --pinned' : ' --unpinned') : '';
+        $cmd .= isset($_object['annotations']) ? ' --annotations "' . $_object['annotations'] . '"' : '';
+        $cmd .= isset($_object['collaborators']) ? ' --collaborators "' . $_object['collaborators'] . '"' : '';
+        if (isset($_object['list']) && is_array($_object['list'])) {
+          $cmd .=  ' --list';
+          foreach ($_object['list'] as $list) {
+              $cmd .= ' "'.str_replace('"', '', json_encode($list[1], JSON_UNESCAPED_UNICODE)).','.($list[0]?'True':'False').'"';
+          }
+        }
+                log::add('gkeep', 'debug', __FUNCTION__ . ' : ' . __('Commande $cmd ', __FILE__) . $cmd);
         $return = self::sendCmdAndFormatResult($cmd);
         $this->refresh();
         return $return;

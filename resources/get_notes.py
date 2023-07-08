@@ -1,400 +1,522 @@
 #!/usr/bin/env python3
 
 import keyring
-import sys
 import gkeepapi
 import json
 import argparse
 
-def save_master_token(username, password):
-    keep = gkeepapi.Keep()
-    success = keep.login(username, password)
+class GoogleKeepManager:
+    CODE_SUCCESS = 0
+    CODE_ERROR = -1
 
-    if success:
-        master_token = keep.getMasterToken()
-        keyring.set_password('google-keep-token', username, master_token)
-        print(json.dumps({"code": 0, "message": "Master token created successfully."}))
-    else:
-        print(json.dumps({"code": -1, "message": "Failed to save master token."}))
-        return False
+    MSG_MASTER_TOKEN_CREATED = "Master token created successfully."
+    MSG_FAILED_SAVE_MASTER_TOKEN = "Failed to save master token."
+    MSG_NO_NOTE_FOUND = "No note found with the specified ID."
+    MSG_FAILED_RESUME_SESSION = "Failed to resume session. Please check credentials and master token."
+    MSG_NOTE_CREATED = "Note created successfully."
+    MSG_LIST_CREATED = "List created successfully."
+    MSG_NOTE_DELETED = "Note has been deleted."
+    MSG_NOTE_RESTORED = "Note has been restored."
+    MSG_NOTE_ARCHIVED = "Note has been archived."
+    MSG_NOTE_UNARCHIVED = "Note has been unarchived."
+    MSG_NOTE_PINNED = "Note has been pinned."
+    MSG_NOTE_UNPINNED = "Note has been unpinned."
+    MSG_NOTE_MODIFIED = "Note has been modified."
+    MSG_NOTE_NOT_IN_LIST = "The note with the specified ID is not a list."
+    MSG_ITEM_ADDED = "Item added successfully."
+    MSG_ITEM_MODIIED = "Item has been modified."
+    MSG_ITEM_DELETED = "Item has been deleted."
+    MSG_NO_ITEM_FOUND = "No item found with the specified ID."
+    MSG_NO_LABEL_FOUND = "No label found."
+    MSG_LABEL_CREATED = "Label created successfully."
 
-def get_master_token(username):
-    master_token = keyring.get_password('google-keep-token', username)
-    if master_token:
-        return master_token
-    else:
-        print(json.dumps({"code": -1, "message": "No master token found for the specified user."}))
-        return None
+    def __init__(self, username):
+        self.username = username
+        self.master_token = None
 
-def get_notes(username, note_id=None):
-    master_token = get_master_token(username)
-    if master_token:
+    def save_master_token(self, password):
         keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
+        success = keep.login(self.username, password)
 
         if success:
-            if note_id:
-                gnote = keep.get(note_id)
-                if gnote:
-                    if isinstance(gnote, gkeepapi.node.List):
-                        items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in gnote.items]
-                        note_dict = {
-                            "id": gnote.id,
-                            "type": gnote.type.name,
-                            "title": gnote.title,
-                            "list": items,
-                            "text": gnote.text,
-                            "sort": gnote.sort,
-                            "color": gnote.color.value,
-                            "archived": gnote.archived,
-                            "pinned": gnote.pinned,
-                            "trashed": gnote.trashed,
-                            "created": gnote.timestamps.created.timestamp(),
-                            "edited": gnote.timestamps.edited.timestamp(),
-                            "updated": gnote.timestamps.updated.timestamp(),
-                            "collaborators": gnote.collaborators.all()
-                        }
+            master_token = keep.getMasterToken()
+            keyring.set_password('google-keep-token', username, master_token)
+            print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_CREATED}))
+        else:
+            print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_SAVE_MASTER_TOKEN}))
+            return False
+
+    def get_master_token(self):
+        self.master_token = keyring.get_password('google-keep-token', self.username)
+        if self.master_token:
+            return self.master_token
+        else:
+            print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_MASTER_TOKEN_FOUND}))
+            return None
+
+    def get_notes(self, note_id=None):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                if note_id:
+                    gnote = keep.get(note_id)
+                    if gnote:
+                        if isinstance(gnote, gkeepapi.node.List):
+                            items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in gnote.items]
+                            note_dict = {
+                                "id": gnote.id,
+                                "type": gnote.type.name,
+                                "title": gnote.title,
+                                "list": items,
+                                "text": gnote.text,
+                                "sort": gnote.sort,
+                                "color": gnote.color.value,
+                                "archived": gnote.archived,
+                                "pinned": gnote.pinned,
+                                "trashed": gnote.trashed,
+                                "created": gnote.timestamps.created.timestamp(),
+                                "edited": gnote.timestamps.edited.timestamp(),
+                                "updated": gnote.timestamps.updated.timestamp(),
+                                "collaborators": gnote.collaborators.all()
+                            }
+                        else:
+                            note_dict = {
+                                "id": gnote.id,
+                                "type": gnote.type.name,
+                                "title": gnote.title,
+                                "text": gnote.text,
+                                "sort": gnote.sort,
+                                "color": gnote.color.value,
+                                "archived": gnote.archived,
+                                "pinned": gnote.pinned,
+                                "trashed": gnote.trashed,
+                                "created": gnote.timestamps.created.timestamp(),
+                                "edited": gnote.timestamps.edited.timestamp(),
+                                "updated": gnote.timestamps.updated.timestamp(),
+                                "collaborators": gnote.collaborators.all()
+                            }
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": note_dict}, sort_keys=True))
                     else:
-                        note_dict = {
-                            "id": gnote.id,
-                            "type": gnote.type.name,
-                            "title": gnote.title,
-                            "text": gnote.text,
-                            "sort": gnote.sort,
-                            "color": gnote.color.value,
-                            "archived": gnote.archived,
-                            "pinned": gnote.pinned,
-                            "trashed": gnote.trashed,
-                            "created": gnote.timestamps.created.timestamp(),
-                            "edited": gnote.timestamps.edited.timestamp(),
-                            "updated": gnote.timestamps.updated.timestamp(),
-                            "collaborators": gnote.collaborators.all()
-                        }
-                    print(json.dumps({"code": 0, "message": note_dict}, sort_keys=True))
+                        print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
                 else:
-                    print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
+                    gnotes = keep.all()
+                    note_json = []
+                    for note in gnotes:
+                        note_dict = {}
+
+                        if isinstance(note, gkeepapi.node.List):
+                            items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in note.items]
+                            note_dict = {
+                                "id": note.id,
+                                "type": note.type.name,
+                                "title": note.title,
+                                "list": items,
+                                "text": note.text,
+                                "sort": note.sort,
+                                "color": note.color.value,
+                                "archived": note.archived,
+                                "pinned": note.pinned,
+                                "trashed": note.trashed,
+                                "created": note.timestamps.created.timestamp(),
+                                "edited": note.timestamps.edited.timestamp(),
+                                "updated": note.timestamps.updated.timestamp(),
+                                "collaborators": note.collaborators.all()
+                            }
+                        else:
+                            note_dict = {
+                                "id": note.id,
+                                "type": note.type.name,
+                                "title": note.title,
+                                "text": note.text,
+                                "sort": note.sort,
+                                "color": note.color.value,
+                                "archived": note.archived,
+                                "pinned": note.pinned,
+                                "trashed": note.trashed,
+                                "created": note.timestamps.created.timestamp(),
+                                "edited": note.timestamps.edited.timestamp(),
+                                "updated": note.timestamps.updated.timestamp(),
+                                "collaborators": note.collaborators.all()
+                            }
+                        note_json.append(note_dict)
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": note_json}, sort_keys=True))
+                keep.sync()
             else:
-                gnotes = keep.all()
-                note_json = []
-                for note in gnotes:
-                    note_dict = {}
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
-                    if isinstance(note, gkeepapi.node.List):
-                        items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in note.items]
-                        note_dict = {
-                            "id": note.id,
-                            "type": note.type.name,
-                            "title": note.title,
-                            "list": items,
-                            "text": note.text,
-                            "sort": note.sort,
-                            "color": note.color.value,
-                            "archived": note.archived,
-                            "pinned": note.pinned,
-                            "trashed": note.trashed,
-                            "created": note.timestamps.created.timestamp(),
-                            "edited": note.timestamps.edited.timestamp(),
-                            "updated": note.timestamps.updated.timestamp(),
-                            "collaborators": note.collaborators.all()
-                        }
-                    else:
-                        note_dict = {
-                            "id": note.id,
-                            "type": note.type.name,
-                            "title": note.title,
-                            "text": note.text,
-                            "sort": note.sort,
-                            "color": note.color.value,
-                            "archived": note.archived,
-                            "pinned": note.pinned,
-                            "trashed": note.trashed,
-                            "created": note.timestamps.created.timestamp(),
-                            "edited": note.timestamps.edited.timestamp(),
-                            "updated": note.timestamps.updated.timestamp(),
-                            "collaborators": note.collaborators.all()
-                        }
-                    note_json.append(note_dict)
-                print(json.dumps({"code": 0, "message": note_json}, sort_keys=True))
-            keep.sync()
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token."}))
+    def create_note(self, title, text=None, color=None, archived=False, pinned=False, labels=None, annotations=None, collaborators=None, list_items=None):
+        if not title:
+            print("Title cannot be empty.")
+            return
 
-def create_note(username, title, text):
-    if not title or not text:
-        print("Title and text cannot be empty.")
-        return
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
 
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.createNote(title, text)
-
-            # Sync up changes
-            keep.sync()
-            print(json.dumps({"code": 0, "message": "Note created successfully."}))
-
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token."}))
-
-def search_notes(username, query=None, func=None, labels=None, colors=None, pinned=None, archived=None, trashed=None):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnotes = keep.find(
-                query=query,
-                func=func,
-                labels=labels,
-                colors=colors,
-                pinned=pinned,
-                archived=archived,
-                trashed=trashed
-            )
-
-            note_json = []
-            for note in gnotes:
-                note_dict = {}
-
-                if isinstance(note, gkeepapi.node.List):
-                    items = [{"id": item.id, "text": item.text, "checked": item.checked} for item in note.checked]
-                    note_dict = {
-                        "id": note.id,
-                        "title": note.title,
-                        "list": items,
-                        "color": note.color.value,
-                        "archived": note.archived,
-                        "pinned": note.pinned,
-                        "timestamp": note.timestamps.created.timestamp(),
-                        "collaborators": note.collaborators.all()
-                    }
+            if success:
+                if list_items is not None:
+                    # Create a list
+                    list_items_tuples = [(item_text, item_checked) for item_text, item_checked in list_items]
+                    gnote = keep.createList(title, list_items_tuples)
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_LIST_CREATED}))
                 else:
-                    note_dict = {
-                        "id": note.id,
-                        "title": note.title,
-                        "text": note.text,
-                        "color": note.color.value,
-                        "archived": note.archived,
-                        "pinned": note.pinned,
-                        "timestamp": note.timestamps.created.timestamp(),
-                        "collaborators": note.collaborators.all()
-                    }
+                    # Create a note
+                    gnote = keep.createNote(title, text)
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_CREATED}))
 
-                note_json.append(note_dict)
-
-            print(json.dumps({"code": 0, "message": note_json}, sort_keys=True))
-
-            keep.sync()
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
-
-def delete_note(username, note_id):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                gnote.delete()
-                keep.sync()
-                print(json.dumps({"code": 0, "message": "Note has been deleted."}))
-            else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
-
-def restore_note(username, note_id):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                gnote.undelete()
-                keep.sync()
-                print(json.dumps({"code": 0, "message": "Note has been restored."}))
-            else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
-
-def archive_note(username, note_id):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                gnote.archive()
-                keep.sync()
-                print(json.dumps({"code": 0, "message": "Note has been archived."}))
-            else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
-
-def unarchive_note(username, note_id):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                gnote.unarchive()
-                keep.sync()
-                print(json.dumps({"code": 0, "message": "Note has been unarchived."}))
-            else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
-
-def pin_note(username, note_id):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                gnote.pinned = True
-                keep.sync()
-                print(json.dumps({"code": 0, "message": "Note has been pinned."}))
-            else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
-
-def unpin_note(username, note_id):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                gnote.pinned = False
-                keep.sync()
-                print(json.dumps({"code": 0, "message": "Note has been unpinned."}))
-            else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
-
-def modify_note(username, note_id, title=None, text=None, color=None, labels=None, annotations=None, collaborators=None):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
-
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                if title is not None:
-                    gnote.title = title
-                if text is not None:
-                    gnote.text = text
                 if color is not None:
                     gnote.color = color
+                gnote.archived = archived
+                gnote.pinned = pinned
                 if labels is not None:
-                    gnote.labels = labels
+                    label = keep.findLabel(labels)
+                    if label is None:
+                        label = keep.createLabel(labels)
+                    gnote.labels.add(label)
                 if annotations is not None:
                     gnote.annotations = annotations
                 if collaborators is not None:
                     gnote.collaborators = collaborators
 
+                # Sync up changes
                 keep.sync()
-                print(json.dumps({"code": 0, "message": "Note has been modified."}))
             else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
-def add_item(username, note_id, item_text):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
+    def search_notes(self, query=None, func=None, labels=None, colors=None, pinned=None, archived=None, trashed=None):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
 
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                if isinstance(gnote, gkeepapi.node.List):
-                    new_item = gnote.add(item_text)
+            if success:
+                gnotes = keep.find(
+                    query=query,
+                    func=func,
+                    labels=labels,
+                    colors=colors,
+                    pinned=pinned,
+                    archived=archived,
+                    trashed=trashed
+                )
+
+                note_json = []
+                for note in gnotes:
+                    note_dict = {}
+
+                    if isinstance(note, gkeepapi.node.List):
+                        items = [{"id": item.id, "text": item.text, "checked": item.checked} for item in note.checked]
+                        note_dict = {
+                            "id": note.id,
+                            "title": note.title,
+                            "list": items,
+                            "color": note.color.value,
+                            "archived": note.archived,
+                            "pinned": note.pinned,
+                            "timestamp": note.timestamps.created.timestamp(),
+                            "collaborators": note.collaborators.all()
+                        }
+                    else:
+                        note_dict = {
+                            "id": note.id,
+                            "title": note.title,
+                            "text": note.text,
+                            "color": note.color.value,
+                            "archived": note.archived,
+                            "pinned": note.pinned,
+                            "timestamp": note.timestamps.created.timestamp(),
+                            "collaborators": note.collaborators.all()
+                        }
+
+                    note_json.append(note_dict)
+
+                print(json.dumps({"code": self.CODE_SUCCESS, "message": note_json}, sort_keys=True))
+
+                keep.sync()
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def delete_note(self, note_id):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    gnote.delete()
                     keep.sync()
-                    print(json.dumps({"code": 0, "message": "Item added successfully."}))
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_DELETED}))
                 else:
-                    print(json.dumps({"code": -1, "message": "The note with the specified ID is not a list."}))
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
             else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
-def modify_item(username, note_id, item_id, text=None, checked=None, unchecked=None):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
+    def restore_note(self, note_id):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
 
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                if isinstance(gnote, gkeepapi.node.List):
-                    item = gnote.get(item_id)
-                    if item:
-                        if text is not None:
-                            item.text = text
-                        if checked:
-                            item.checked = True
-                        elif unchecked:
-                            item.checked = False
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    gnote.undelete()
+                    keep.sync()
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_RESTORED}))
+                else:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def archive_note(self, note_id):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    gnote.archive()
+                    keep.sync()
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_ARCHIVED}))
+                else:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def unarchive_note(self, note_id):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    gnote.unarchive()
+                    keep.sync()
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_UNARCHIVED}))
+                else:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def pin_note(self, note_id):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    gnote.pinned = True
+                    keep.sync()
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_PINNED}))
+                else:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def unpin_note(self, note_id):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    gnote.pinned = False
+                    keep.sync()
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_UNPINNED}))
+                else:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def modify_note(self, note_id, title=None, text=None, color=None, labels=None, annotations=None, collaborators=None):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    if title is not None:
+                        gnote.title = title
+                    if text is not None:
+                        gnote.text = text
+                    if color is not None:
+                        gnote.color = color
+                    if labels is not None:
+                        label = keep.findLabel(labels)
+                        gnote.labels.add(label)
+                    if annotations is not None:
+                        gnote.annotations = annotations
+                    if collaborators is not None:
+                        gnote.collaborators = collaborators
+
+                    keep.sync()
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_MODIFIED}))
+                else:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def add_item(self, note_id, item_text):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    if isinstance(gnote, gkeepapi.node.List):
+                        new_item = gnote.add(item_text)
                         keep.sync()
-                        print(json.dumps({"code": 0, "message": "Item has been modified."}))
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_ITEM_ADDED}))
                     else:
-                        print(json.dumps({"code": -1, "message": "No item found with the specified ID."}))
+                        print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NOTE_NOT_IN_LIST}))
                 else:
-                    print(json.dumps({"code": -1, "message": "The note with the specified ID is not a list."}))
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
             else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
-        else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
-def delete_item(username, note_id, item_id):
-    master_token = get_master_token(username)
-    if master_token:
-        keep = gkeepapi.Keep()
-        success = keep.resume(username, master_token)
+    def modify_item(self, note_id, item_id, text=None, checked=None, unchecked=None):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
 
-        if success:
-            gnote = keep.get(note_id)
-            if gnote:
-                if isinstance(gnote, gkeepapi.node.List):
-                    item = gnote.get(item_id)
-                    if item:
-                        item.delete()
-                        keep.sync()
-                        print(json.dumps({"code": 0, "message": "Item has been deleted."}))
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    if isinstance(gnote, gkeepapi.node.List):
+                        item = gnote.get(item_id)
+                        if item:
+                            if text is not None:
+                                item.text = text
+                            if checked:
+                                item.checked = True
+                            elif unchecked:
+                                item.checked = False
+                            keep.sync()
+                            print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_ITEM_MODIIED}))
+                        else:
+                            print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_ITEM_FOUND}))
                     else:
-                        print(json.dumps({"code": -1, "message": "No item found with the specified ID."}))
+                        print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NOTE_NOT_IN_LIST}))
                 else:
-                    print(json.dumps({"code": -1, "message": "The note with the specified ID is not a list."}))
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
             else:
-                print(json.dumps({"code": -1, "message": "No note found with the specified ID."}))
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def delete_item(self, note_id, item_id):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                gnote = keep.get(note_id)
+                if gnote:
+                    if isinstance(gnote, gkeepapi.node.List):
+                        item = gnote.get(item_id)
+                        if item:
+                            item.delete()
+                            keep.sync()
+                            print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_ITEM_DELETED}))
+                        else:
+                            print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_ITEM_FOUND}))
+                    else:
+                        print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NOTE_NOT_IN_LIST}))
+                else:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def get_label(self, name=None, labelid=None):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                if name is not None:
+                    label = keep.findLabel(name)
+                    if not label:
+                        print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_LABEL_FOUND}))
+                    else:
+                        label_dict = {
+                            "id": label.id,
+                            "name": label.name,
+                            "created": label.timestamps.created.timestamp(),
+                            "updated": label.timestamps.updated.timestamp()
+                        }
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": label_dict}, sort_keys=True))
+                elif labelid is not None:
+                    label = keep.getLabel(labelid)
+                    if not label:
+                        print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_LABEL_FOUND}))
+                    else:
+                        label_dict = {
+                            "id": label.id,
+                            "name": label.name,
+                            "created": label.timestamps.created.timestamp(),
+                            "updated": label.timestamps.updated.timestamp()
+                        }
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": label_dict}, sort_keys=True))
+                else:
+                    labels = keep.labels()
+                    label_list = []
+                    for label in labels:
+                        label_dict = {
+                            "id": label.id,
+                            "name": label.name,
+                            "created": label.timestamps.created.timestamp(),
+                            "updated": label.timestamps.updated.timestamp()
+                        }
+                        label_list.append(label_dict)
+                    if not label_list:
+                        print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_LABEL_FOUND}))
+                    else:
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": label_list}, sort_keys=True))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def create_label(self, name):
+        master_token = self.get_master_token()
+        if master_token:
+            keep = gkeepapi.Keep()
+            success = keep.resume(self.username, master_token)
+
+            if success:
+                label = keep.findLabel(name, create=True)
+                #label = keep.createLabel(name)
+                label_list = []
+                label_dict = {
+                    "id": label.id,
+                    "name": label.name
+                }
+                label_list.append(label_dict)
+                if not label_list:
+                    print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_LABEL_FOUND}))
+                else:
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": label_list}, sort_keys=True))
+            else:
+                print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
         else:
-            print(json.dumps({"code": -1, "message": "Failed to resume session. Please check credentials and master token"}))
+            print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_MASTER_TOKEN_FOUND}))
 
 def main():
     parser = argparse.ArgumentParser(description="Google Keep CLI for Jeedom")
@@ -414,9 +536,18 @@ def main():
     parser_get_notes.add_argument("--note_id", help="ID of the note to restore")
 
     # Commande "create_note"
-    parser_create_note = subparsers.add_parser("create_note", help="Create a new note")
-    parser_create_note.add_argument("--title", help="Title of the note")
+    parser_create_note = subparsers.add_parser("create_note", help="Create a new note or list")
+    parser_create_note.add_argument("--title", help="Title of the note or list")
     parser_create_note.add_argument("--text", help="Text of the note")
+    parser_create_note.add_argument("--color", help="Color of the note")
+    parser_create_note.add_argument("--archived", action="store_true", help="Set archived status for the item")
+    parser_create_note.add_argument("--unarchived", action="store_true", help="Set unarchived status for the item")
+    parser_create_note.add_argument("--pinned", action="store_true", help="Set pinned status for the item")
+    parser_create_note.add_argument("--unpinned", action="store_true", help="Set unpinned status for the item")
+    parser_create_note.add_argument("--labels", help="Labels for the note")
+    parser_create_note.add_argument('--annotations', help='New annotations for the note.')
+    parser_create_note.add_argument('--collaborators', help='New collaborators for the note.')
+    parser_create_note.add_argument("--list", nargs="+", action="append", metavar="ITEM", help="Items of the list in the format 'text,checked'")
 
     # Commande "search_notes"
     parser_search_notes = subparsers.add_parser("search_notes", help="Search notes")
@@ -474,7 +605,19 @@ def main():
     parser_delete_item.add_argument("--note_id", help="ID of the note to delete the item to")
     parser_delete_item.add_argument("--item_id", help="ID of the item to delete")
 
+    # Commande "get_label"
+    parser_get_label = subparsers.add_parser("get_label", help="Get labels")
+    parser_get_label.add_argument("--name", help="Name of the label to find")
+    parser_get_label.add_argument("--id", help="Name of the label to find")
+
+    # Commande "create_label"
+    parser_add_label = subparsers.add_parser("create_label", help="Get labels")
+    parser_add_label.add_argument("name", help="Name of the label to add")
+
     args = parser.parse_args()
+    
+    manager = GoogleKeepManager(args.username)
+
     # Vérifier si l'argument --username est fourni
     if not args.username:
         print("Erreur : l'argument --username est requis.")
@@ -482,50 +625,80 @@ def main():
 
     # Exécuter la commande appropriée en fonction des arguments fournis
     if args.command == "save_master_token":
-        save_master_token(args.username, args.password)
+        manager.save_master_token(args.username, args.password)
     elif args.command == "get_notes":
         if hasattr(args, 'note_id') and args.note_id:
-            get_notes(args.username, args.note_id)
+            manager.get_notes(args.note_id)
         else:
-            get_notes(args.username)
+            manager.get_notes()
+
     elif args.command == "create_note":
-        create_note(args.username, args.title, args.text)
+        if args.list:
+            list_items = []
+            for item_str in args.list[0]:
+                item_parts = item_str.split(",")
+                if len(item_parts) == 2:
+                    item_text = item_parts[0].strip()
+                    item_checked = item_parts[1].strip().lower() == "true"
+                    list_items.append((item_text, item_checked))
+            manager.create_note(
+                args.title,
+                list_items=list_items,
+                color=args.color,
+                archived=args.archived and not args.unarchived,
+                pinned=args.pinned and not args.unpinned,
+                labels=args.labels,
+                annotations=args.annotations,
+                collaborators=args.collaborators
+            )
+        else:
+            manager.create_note(
+                args.title,
+                text=args.text,
+                color=args.color,
+                archived=args.archived and not args.unarchived,
+                pinned=args.pinned and not args.unpinned,
+                labels=args.labels,
+                annotations=args.annotations,
+                collaborators=args.collaborators
+            )
     elif args.command == "search_notes":
-        search_notes(args.username, args.query)
+        manager.search_notes(args.query)
     elif args.command == "delete_note":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
             return
-        delete_note(args.username, args.note_id)
+        manager.delete_note(args.note_id)
     elif args.command == "restore_note":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
-            return        restore_note(args.username, args.note_id)
+            return
+        manager.restore_note(args.note_id)
     elif args.command == "archive_note":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
             return
-        archive_note(args.username, args.note_id)
+        manager.archive_note(args.note_id)
     elif args.command == "unarchive_note":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
             return
-        unarchive_note(args.username, args.note_id)
+        manager.unarchive_note(args.note_id)
     elif args.command == "pin_note":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
             return
-        pin_note(args.username, args.note_id)
+        manager.pin_note(args.note_id)
     elif args.command == "unpin_note":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
             return
-        unpin_note(args.username, args.note_id)
+        manager.unpin_note(args.note_id)
     elif args.command == "modify_note":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
             return
-        modify_note(args.username, args.note_id, args.title, args.text, args.color, args.labels, args.annotations, args.collaborators)
+        manager.modify_note(args.note_id, args.title, args.text, args.color, args.labels, args.annotations, args.collaborators)
     elif args.command == "modify_item":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
@@ -534,16 +707,16 @@ def main():
             print("Erreur : l'identifiant de l'item est requis.")
             return
         if args.checked:
-            modify_item(args.username, args.note_id, args.item_id, text=args.text, checked=True)
+            manager.modify_item(args.note_id, args.item_id, text=args.text, checked=True)
         elif args.unchecked:
-            modify_item(args.username, args.note_id, args.item_id, text=args.text, unchecked=True)
+            manager.modify_item(args.note_id, args.item_id, text=args.text, unchecked=True)
         else:
-            modify_item(args.username, args.note_id, args.item_id, text=args.text)
+            manager.modify_item(args.note_id, args.item_id, text=args.text)
     elif args.command == "add_item":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
             return
-        add_item(args.username, args.note_id, args.text)
+        manager.add_item(args.note_id, args.text)
     elif args.command == "delete_item":
         if not args.note_id:
             print("Erreur : l'identifiant de la note est requis.")
@@ -551,7 +724,19 @@ def main():
         if not args.item_id:
             print("Erreur : l'identifiant de l'item est requis.")
             return
-        delete_item(args.username, args.note_id, args.item_id)
+        manager.delete_item(args.note_id, args.item_id)
+    elif args.command == "get_label":
+        if hasattr(args, 'name') and args.name:
+            manager.get_label(args.name)
+        elif hasattr(args, 'id') and args.id:
+            manager.get_label(args.id)
+        else:
+            manager.get_label()
+    elif args.command == "create_label":
+        if not args.name:
+            print("Erreur : le nom de l'étiquette est requis.")
+            return
+        manager.create_label(args.name)
     else:
         print("Invalid command")
 
