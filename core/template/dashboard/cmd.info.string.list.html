@@ -39,7 +39,6 @@
     <template></template>
     <script>
       jeedom.cmd.addUpdateFunction('#id#',function(_options) {
-        console.log('#keepId#')
         if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
           cmd.setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
           cmd.querySelector('.state').empty().append(_options.display_value+' #unite#')
@@ -82,13 +81,11 @@
       });
 
       document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragstart', function(event) {
-        console.log('dragstart');
           event.dataTransfer.setData('text/plain', event.target.dataset.id);
           document.querySelector('.cmd[data-cmd_uid=#uid#]').classList.add('dragging');
       })
 
       document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragover', function(event) {
-        console.log('dragover');
         event.preventDefault();
         var draggingElement = document.querySelector('.dragging');
         var targetElement = event.target;
@@ -99,7 +96,6 @@
       })
 
       document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragend', function(event) {
-        console.log('dragend');
          document.querySelector('.cmd[data-cmd_uid=#uid#]').classList.remove('dragging');
       });
 

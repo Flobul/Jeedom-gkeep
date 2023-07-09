@@ -1,5 +1,5 @@
-<div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd #custom_layout# #eqLogic_class# #class# #category#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width: #width#;height: #height#;#style#">
-  <div class="widget-name">
+<div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd #custom_layout# #eqLogic_class# #class# #category#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width: #width#;height: #height#;#style#;background-color: #bgEqLogic# !important;">
+  <div class="widget-name" style="background-color: #bgWidgetName# !important;">
     <span style="color:#background-color#" title="#alert_name#">
       <i class='#alert_icon#'></i>
     </span>
@@ -53,6 +53,12 @@
         color: var(--linkHoverLight-color) !important;
         opacity: .65;
     }
+    .eqLogic[data-eqLogic_uid="#uid#"] .state {
+        color: #colorEqLogic# !important;
+    }
+    .eqLogic[data-eqLogic_uid="#uid#"] .widget-name span {
+        color: #colorWidgetName# !important;
+    }
   </style>
   <script>
     if ('#panelLink#' == '') {
@@ -104,5 +110,6 @@
     } else {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive')?.remove()
     }
+
   </script>
 </div>

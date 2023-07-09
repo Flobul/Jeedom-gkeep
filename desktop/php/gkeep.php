@@ -42,7 +42,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
           gkeep_display::displayActionCard('{{Suppression de tous les appareils}}', 'fa-trash-alt', 'data-action="delete" data-action2="all"', 'logoTrashGkeep');
         ?>
     </div>
-    <legend><i class="icon kiko-smart-house"></i> {{Mes appareils}}</legend>
+    <legend><i class="icon kiko-smart-house"></i> {{Mes notes}}</legend>
 		<?php
             if (count($eqLogics) == 0) {
                 echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement trouvé, cliquez sur "Synchronisation" pour commencer}}</div>';
@@ -146,7 +146,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                   <thead>
                   </thead>
                   <tbody>
-
+                  
                     <tr>
                       <td class="col-sm-4">
                         <span style="font-size : 1em;">{{Type}}</span>
@@ -261,12 +261,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                     <img src="plugins/gkeep/plugin_info/gkeep_icon.png" data-original=".svg" id="img_device" class="img-responsive" style="max-height:450px;max-width:400px" onerror="this.src='core/img/no_image.gif'" />
                   </center>
                 </div>
-              </div>
-              <div class="form-group">
-                <div class="col-sm-10">
-                  <a class="btn btn-success btn-sm roundedLeft roundedRight" id="bt_showPrograms"><i class="fa fa-cogs"></i> {{Programmes}}</a>
-                </div>
-              </div>
+              </div> 
 
             </fieldset>
           </form>

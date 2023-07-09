@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 
+"""
+Auteur: Flobul <flobul.jeedom@gmail.com>
+Version: 0.9
+Description: This script manages Google Keep notes using the gkeepapi library. It allows you to interact with your Google Keep account, create, retrieve, update, and delete notes, as well as manage labels and annotations. The script uses the keyring library to securely store authentication credentials. It provides a command-line interface with various options for performing different operations on your Google Keep notes.
+"""
+
 import keyring
 import gkeepapi
 import json

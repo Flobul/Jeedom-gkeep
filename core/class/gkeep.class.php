@@ -22,7 +22,8 @@ require_once __DIR__ . "/../../../../core/php/core.inc.php";
 class gkeep extends eqLogic
 {
     /*     * *************************Attributs****************************** */
-    public static $_pluginVersion = '0.90';
+    public static $_pluginVersion = '0.91';
+    public static $_templateArray = array();
     public static $_widgetPossibility = array(
         'custom' => true,
         'parameters' => array(
@@ -40,30 +41,15 @@ class gkeep extends eqLogic
 				'allow_transparent' => true,
 				'allow_displayType' => true
 			),
-			'colorEqLogic' => array(
-				'name' => 'Couleur de la police',
-				'type' => 'color',
-				'default' => '',
-				'allow_transparent' => true,
-				'allow_displayType' => true
-			),
 			'bgEqLogic' => array(
 				'name' => 'Couleur de fond',
 				'type' => 'color',
 				'default' => '',
 				'allow_transparent' => true,
 				'allow_displayType' => true
-			),
-			'cmdName' => array(
-				'name' => 'Nom des commandes',
-				'type' => '',
-				'default' => '',
-				'allow_transparent' => false,
-				'allow_displayType' => true
 			)
         )
     );
-    public static $_templateArray = array();
 
     /**
      * Méthode appellée par le core (moteur de tâche) cron configuré dans la fonction gkeep_install
@@ -203,7 +189,7 @@ class gkeep extends eqLogic
         return self::getNotes();
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('fin', __FILE__));
     }
-
+  
     public static function dependancy_install() {
         log::remove(__CLASS__ . '_update');
         return array('script' => dirname(__FILE__) . '/../../resources/install_#stype#.sh ' . jeedom::getTmpFolder(__CLASS__) . '/dependency' . ' ' . dirname(__FILE__) . '/../../resources', 'log' => log::getPathToLog(__CLASS__ . '_update'));
@@ -228,14 +214,14 @@ class gkeep extends eqLogic
         }
         return $return;
     }
-
+  
     public static function login()
     {
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__));
         if (config::byKey('email', __CLASS__, '') == '' || config::byKey('password', __CLASS__, '') == '') {
             throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
         }
-        $cmd = system::getCmdSudo() . self::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py save_master';
+        $cmd = system::getCmdSudo() . self::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py save_master';
         $cmd .= ' --username ' . config::byKey('email', __CLASS__);
         $cmd .= ' --password ' . config::byKey('password', __CLASS__);
 
@@ -253,8 +239,8 @@ class gkeep extends eqLogic
         if (config::byKey('email', __CLASS__, '') == '') {
             throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
         }
-
-        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+      
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py';
         $cmd .= ' --username ' . config::byKey('email', __CLASS__) . ' get_notes';
         $cmd .= ($_id?' --note_id "' . $_id . '"':'');
 
@@ -272,18 +258,26 @@ class gkeep extends eqLogic
     }
 
     public static function removeOldEqlogic($_notes) {
+        if (count($_notes) < 1) return;
+        $eqLogicsToRemove = array();
         foreach (eqLogic::byType(__CLASS__) as $eqLogic) {
             $found = false;
             foreach ($_notes as $note) {
                 if ($eqLogic->getLogicalId() == $note['id']) {
                     $found = true;
+                    break;
                 }
             }
-            log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Suppression de la note ', __FILE__) . $eqLogic->getName());
+            if (!$found) {
+                $eqLogicsToRemove[] = $eqLogic;
+            }
+        }
+        foreach ($eqLogicsToRemove as $eqLogic) {
+            log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Suppression de la note ', __FILE__) . $eqLogic->getLogicalId() . ' ' . $eqLogic->getName());
             $eqLogic->remove();
         }
     }
-
+  
     /**
      * Créé l'équipement avec les valeurs du buffer
      * @param array $_data Tableau des valeurs récupérées dans le buffer
@@ -315,6 +309,9 @@ class gkeep extends eqLogic
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__) . " new object");
         if (isset($_note['type'])) {
             $eqLogic->setConfiguration('type', $_note['type']);
+            if ($_note['type'] == 'Text') {
+                $eqLogic->setDisplay('width', '350px');
+            }
         }
         if (isset($_note['archived'])) {
             $eqLogic->setConfiguration('archived', $_note['archived']);
@@ -332,6 +329,8 @@ class gkeep extends eqLogic
             $eqLogic->setConfiguration('sort', $_note['sort']);
         }
         if (isset($_note['color'])) {
+		    $eqLogic->setDisplay('advanceWidgetParameterbgEqLogicdashboard', self::getColor($_note['color']));
+		    $eqLogic->setDisplay('advanceWidgetParameterbgEqLogicmobile', self::getColor($_note['color']));
             $eqLogic->setConfiguration('color', $_note['color']);
         }
         if (isset($_note['created'])) {
@@ -473,9 +472,52 @@ class gkeep extends eqLogic
         return 'plugins/gkeep/plugin_info/gkeep_icon.png';
     }
 
+    public static function getColor($_color)
+    {
+        switch ($_color) {
+            case 'BROWN':
+                $_color = '#e1caac';
+                break;
+            case 'ORANGE':
+                $_color = '#f1be42';
+                break;
+            case 'RED':
+                $_color = '#e49085';
+                break;
+            case 'YELLOW':
+                $_color = '#fdf487';
+                break;
+            case 'GREEN':
+                $_color = '#d6fd9d';
+                break;
+            case 'PINK':
+                $_color = '#f5d0e6';
+                break;
+            case 'PURPLE':
+                $_color = '#d0aff5';
+                break;
+            case 'BLUE':
+                $_color = '#d2eef6';
+                break;
+            case 'GRAY':
+                $_color = '#e8e9ec';
+                break;
+            case 'CERULEAN ':
+                $_color = '#b3caf5';
+                break;
+            case 'TEAL':
+                $_color = '#bafceb';
+                break;
+            case 'DEFAULT':
+                $_color = '#fefefe';
+                break;
+        }
+        return $_color;
+    }
+                                 
     public function actionNote($_action)
     {
-        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py';
         switch ($_action) {
             case 'pinNote':
                 $_action = 'pin_note';
@@ -504,7 +546,7 @@ class gkeep extends eqLogic
 
     public function checkItem($_itemId, $_change)
     {
-        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py';
         $cmd .= ' --username ' . config::byKey('email', 'gkeep') . ' modify_item';
         $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
         $cmd .= ' --item_id "' . $_itemId . '"';
@@ -517,7 +559,7 @@ class gkeep extends eqLogic
 
     public function addItem($_itemId, $_change)
     {
-        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py';
         $cmd .= ' --username ' . config::byKey('email', 'gkeep') . ' add_item';
         $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
         $cmd .= isset($_change['text']) ? ' --text "' . str_replace('"', '\"', $_change['text']) . '"' : '';
@@ -528,7 +570,7 @@ class gkeep extends eqLogic
 
     public function deleteItem($_itemId)
     {
-        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py';
         $cmd .= ' --username ' . config::byKey('email', 'gkeep') . ' delete_item';
         $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
         $cmd .= ' --item_id "' . $_itemId . '"';
@@ -540,7 +582,7 @@ class gkeep extends eqLogic
 
     public function updateNote($_change)
     {
-        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py';
         $cmd .= ' --username ' . config::byKey('email', 'gkeep') . ' modify_note';
         $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
         $cmd .= isset($_change['text']) ? ' --text "' . str_replace('"', '\"', $_change['text']) . '"' : '';
@@ -556,7 +598,7 @@ class gkeep extends eqLogic
 
     public function addNote($_object)
     {
-        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/get_notes.py';
+        $cmd = system::getCmdSudo() . gkeep::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py';
         $cmd .= ' --username ' . config::byKey('email', 'gkeep') . ' create_note';
         $cmd .= isset($_object['text']) ? ' --text "' . str_replace('"', '\"', $_object['text']) . '"' : '';
         $cmd .= isset($_object['title']) ? ' --title "' . $_object['title'] . '"' : '';
@@ -583,7 +625,7 @@ class gkeep extends eqLogic
         $config = trim(exec($cmd));
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Résultat brut ', __FILE__) . $config);
         $result_json = json_decode($config,true);
-        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat array ', __FILE__) . json_encode($result_json));
+        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat array ', __FILE__) . json_encode($result_json)); 
         if (is_array($result_json) && isset($result_json['code'])) {
             return $result_json;
         } else {
@@ -621,7 +663,7 @@ class gkeep extends eqLogic
 
 		$_version = jeedom::versionAlias($_version);
 		$replace['#calledFrom#'] = __CLASS__;
-        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat $_layout ', __FILE__) . $this->getDisplay('layout::' . $_version));
+        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat $_layout ', __FILE__) . $this->getDisplay('layout::' . $_version)); 
 		switch ($this->getDisplay('layout::' . $_version)) {
 			case 'table':
 				$replace['#eqLogic_class#'] = 'eqLogic_layout_table';

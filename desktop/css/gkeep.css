@@ -55,37 +55,36 @@
     color: red;  
 }
 
-
-.imgColorFilter_BROWN {
-    filter: invert(51%) sepia(17%) saturate(954%) hue-rotate(356deg) brightness(94%) contrast(87%);
-}
-.imgColorFilter_CERULEAN {
-    filter: invert(41%) sepia(73%) saturate(397%) hue-rotate(165deg) brightness(99%) contrast(91%);
-}
-.imgColorFilter_GRAY {
-    filter: invert(91%) sepia(6%) saturate(281%) hue-rotate(351deg) brightness(92%) contrast(89%);
-}
-.imgColorFilter_GREEN {
-    filter: invert(87%) sepia(82%) saturate(487%) hue-rotate(28deg) brightness(104%) contrast(113%);
-}
 .imgColorFilter_ORANGE {
-    filter: invert(59%) sepia(83%) saturate(1094%) hue-rotate(359deg) brightness(102%) contrast(106%);
+    filter: brightness(111%) contrast(174%) hue-rotate(313deg) saturate(224%);
 }
-.imgColorFilter_PINK {
-    filter: invert(75%) sepia(37%) saturate(2407%) hue-rotate(308deg) brightness(127%) contrast(104%);
-}
-.imgColorFilter_PURPLE {
-    filter: invert(76%) sepia(79%) saturate(1886%) hue-rotate(210deg) brightness(102%) contrast(93%);
+.imgColorFilter_BROWN {
+    filter: brightness(73%) contrast(200%) saturate(168%) grayscale(56%);
 }
 .imgColorFilter_RED {
-    filter: invert(81%) sepia(67%) saturate(1847%) hue-rotate(319deg) brightness(105%) contrast(82%);
-}
-.imgColorFilter_TEAL {
-    filter: invert(100%) sepia(37%) saturate(2219%) hue-rotate(91deg) brightness(99%) contrast(102%);
+    filter: brightness(97%) contrast(104%) hue-rotate(306deg) saturate(205%) grayscale(25%);
 }
 .imgColorFilter_YELLOW {
-    filter: invert(99%) sepia(98%) saturate(1099%) hue-rotate(336deg) brightness(104%) contrast(103%);
+    filter: brightness(95%) contrast(200%) hue-rotate(360deg) saturate(300%) grayscale(28%);
+}
+.imgColorFilter_GREEN {
+    filter: brightness(89%) contrast(161%) hue-rotate(39deg) saturate(158%) grayscale(41%);
+}
+.imgColorFilter_PINK {
+    filter: brightness(115%) contrast(168%) hue-rotate(218deg) saturate(158%) grayscale(53%);
+}
+.imgColorFilter_PURPLE {
+    filter: brightness(117%) contrast(139%) hue-rotate(253deg) saturate(250%) grayscale(53%);
 }
 .imgColorFilter_BLUE {
-    filter: invert(80%) sepia(70%) saturate(3555%) hue-rotate(190deg) brightness(115%) contrast(90%);
+    filter: brightness(113%) contrast(105%) hue-rotate(174deg) saturate(169%) grayscale(58%);
+}
+.imgColorFilter_GRAY {
+    filter: brightness(113%) saturate(0%) grayscale(100%);
+}
+.imgColorFilter_CERULEAN {
+    filter: filter: brightness(99%) contrast(84%) hue-rotate(184deg) saturate(55%) grayscale(1%) ;
+}
+.imgColorFilter_TEAL {
+    filter: brightness(117%) contrast(117%) hue-rotate(136deg) saturate(65%) grayscale(44%);
 }
