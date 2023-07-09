@@ -48,7 +48,7 @@
    $("#span_plugin_install_date").empty().append("v" + version + " (" + dateVersion + ")");
 
 
-   $('.bt_refreshPluginInfo').after('<a class="btn btn-success btn-sm" target="_blank" href="https://market.jeedom.com/index.php?v=d&p=market_display&id=4099"><i class="fas fa-comment-dots "></i> Donner mon avis</a>');
+   $('.bt_refreshPluginInfo').after('<a class="btn btn-success btn-sm" target="_blank" href="https://market.jeedom.com/index.php?v=d&p=market_display&id=4423"><i class="fas fa-comment-dots "></i> Donner mon avis</a>');
 
   $('.configKey[data-l1key=mobileormail]').off('change').on('change', function() {
       if ($(this).value() == 1) {

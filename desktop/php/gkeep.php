@@ -83,7 +83,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <fieldset>
               <div class="form-group">
                 <legend><i class="fas fa-sitemap icon_green"></i> {{Général}}</legend>
-                <label class="col-sm-4 control-label">{{Nom du vidéoprojecteur}}</label>
+                <label class="col-sm-4 control-label">{{Nom de la note}}</label>
                 <div class="col-sm-5">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
                   <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de la box}}" />
@@ -146,7 +146,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                   <thead>
                   </thead>
                   <tbody>
-                  
+
                     <tr>
                       <td class="col-sm-4">
                         <span style="font-size : 1em;">{{Type}}</span>
