@@ -54,7 +54,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 echo '        <a class="btn roundedRight hidden" id="bt_pluginDisplayAsTable" data-coreSupport="1" data-state="0"><i class="fas fa-grip-lines"></i></a>';
                 echo '    </div>';
                 echo '</div>';
-                gkeep_display::displayEqLogicThumbnailContainer($eqLogics);
+                gkeep_display::displayEqLogicThumbnailContainer($eqLogics, 'pinned');
+                gkeep_display::displayEqLogicThumbnailContainer($eqLogics, 'unpinned');
+                gkeep_display::displayEqLogicThumbnailContainer($eqLogics, 'archived');
+                gkeep_display::displayEqLogicThumbnailContainer($eqLogics, 'trashed');
             }
         ?>
   </div>

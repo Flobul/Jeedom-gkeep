@@ -18,7 +18,6 @@
     margin-left:55px;
 }
 
-
 .eqLogicThumbnailDisplay .panel-title {
     background-color: #fbbc04;
     border-radius: 10px;
@@ -47,4 +46,46 @@
 }
 #accordiongkeep:hover {
     opacity: .65
+}
+#accordiongkeep i.fas.fa-map-pin.colored,
+#accordiongkeep i.fas.fa-archive.colored {
+    color: orangered;  
+}
+#accordiongkeep i.fas.fa-trash.colored {
+    color: red;  
+}
+
+
+.imgColorFilter_BROWN {
+    filter: invert(51%) sepia(17%) saturate(954%) hue-rotate(356deg) brightness(94%) contrast(87%);
+}
+.imgColorFilter_CERULEAN {
+    filter: invert(41%) sepia(73%) saturate(397%) hue-rotate(165deg) brightness(99%) contrast(91%);
+}
+.imgColorFilter_GRAY {
+    filter: invert(91%) sepia(6%) saturate(281%) hue-rotate(351deg) brightness(92%) contrast(89%);
+}
+.imgColorFilter_GREEN {
+    filter: invert(87%) sepia(82%) saturate(487%) hue-rotate(28deg) brightness(104%) contrast(113%);
+}
+.imgColorFilter_ORANGE {
+    filter: invert(59%) sepia(83%) saturate(1094%) hue-rotate(359deg) brightness(102%) contrast(106%);
+}
+.imgColorFilter_PINK {
+    filter: invert(75%) sepia(37%) saturate(2407%) hue-rotate(308deg) brightness(127%) contrast(104%);
+}
+.imgColorFilter_PURPLE {
+    filter: invert(76%) sepia(79%) saturate(1886%) hue-rotate(210deg) brightness(102%) contrast(93%);
+}
+.imgColorFilter_RED {
+    filter: invert(81%) sepia(67%) saturate(1847%) hue-rotate(319deg) brightness(105%) contrast(82%);
+}
+.imgColorFilter_TEAL {
+    filter: invert(100%) sepia(37%) saturate(2219%) hue-rotate(91deg) brightness(99%) contrast(102%);
+}
+.imgColorFilter_YELLOW {
+    filter: invert(99%) sepia(98%) saturate(1099%) hue-rotate(336deg) brightness(104%) contrast(103%);
+}
+.imgColorFilter_BLUE {
+    filter: invert(80%) sepia(70%) saturate(3555%) hue-rotate(190deg) brightness(115%) contrast(90%);
 }

@@ -244,16 +244,19 @@ function synchronize() {
     },
     dataType: 'json',
     error: function(request, status, error) {
+      console.log(request, status, error)
       handleAjaxError(request, status, error);
     },
     success: function(data) {
+      console.log(data)
       if (data.state != 'ok') {
         $.fn.showAlert({
           message: data.result,
           level: 'danger'
         });
-        return;
+        //return;
       } else {
+      console.log(data)
         $.fn.showAlert({
           message: '{{Synchronisation terminée}}',
           level: 'success'

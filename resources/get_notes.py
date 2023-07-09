@@ -64,8 +64,10 @@ class GoogleKeepManager:
                 if note_id:
                     gnote = keep.get(note_id)
                     if gnote:
+                        annotations = [annotation.save() for annotation in gnote.annotations.all()]
                         if isinstance(gnote, gkeepapi.node.List):
                             items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in gnote.items]
+
                             note_dict = {
                                 "id": gnote.id,
                                 "type": gnote.type.name,
@@ -80,7 +82,8 @@ class GoogleKeepManager:
                                 "created": gnote.timestamps.created.timestamp(),
                                 "edited": gnote.timestamps.edited.timestamp(),
                                 "updated": gnote.timestamps.updated.timestamp(),
-                                "collaborators": gnote.collaborators.all()
+                                "collaborators": gnote.collaborators.all(),
+                                "annotations": annotations
                             }
                         else:
                             note_dict = {
@@ -96,7 +99,8 @@ class GoogleKeepManager:
                                 "created": gnote.timestamps.created.timestamp(),
                                 "edited": gnote.timestamps.edited.timestamp(),
                                 "updated": gnote.timestamps.updated.timestamp(),
-                                "collaborators": gnote.collaborators.all()
+                                "collaborators": gnote.collaborators.all(),
+                                "annotations": annotations
                             }
                         print(json.dumps({"code": self.CODE_SUCCESS, "message": note_dict}, sort_keys=True))
                     else:
@@ -106,7 +110,7 @@ class GoogleKeepManager:
                     note_json = []
                     for note in gnotes:
                         note_dict = {}
-
+                        annotations = [annotation.save() for annotation in note.annotations.all()]
                         if isinstance(note, gkeepapi.node.List):
                             items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in note.items]
                             note_dict = {
@@ -123,7 +127,8 @@ class GoogleKeepManager:
                                 "created": note.timestamps.created.timestamp(),
                                 "edited": note.timestamps.edited.timestamp(),
                                 "updated": note.timestamps.updated.timestamp(),
-                                "collaborators": note.collaborators.all()
+                                "collaborators": note.collaborators.all(),
+                                "annotations": annotations
                             }
                         else:
                             note_dict = {
@@ -139,7 +144,8 @@ class GoogleKeepManager:
                                 "created": note.timestamps.created.timestamp(),
                                 "edited": note.timestamps.edited.timestamp(),
                                 "updated": note.timestamps.updated.timestamp(),
-                                "collaborators": note.collaborators.all()
+                                "collaborators": note.collaborators.all(),
+                                "annotations": annotations
                             }
                         note_json.append(note_dict)
                     print(json.dumps({"code": self.CODE_SUCCESS, "message": note_json}, sort_keys=True))
@@ -173,9 +179,7 @@ class GoogleKeepManager:
                 gnote.archived = archived
                 gnote.pinned = pinned
                 if labels is not None:
-                    label = keep.findLabel(labels)
-                    if label is None:
-                        label = keep.createLabel(labels)
+                    label = keep.findLabel(labels, create=True)
                     gnote.labels.add(label)
                 if annotations is not None:
                     gnote.annotations = annotations
@@ -207,33 +211,43 @@ class GoogleKeepManager:
                 note_json = []
                 for note in gnotes:
                     note_dict = {}
-
                     if isinstance(note, gkeepapi.node.List):
-                        items = [{"id": item.id, "text": item.text, "checked": item.checked} for item in note.checked]
+                        items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in note.items]
                         note_dict = {
                             "id": note.id,
+                            "type": note.type.name,
                             "title": note.title,
                             "list": items,
+                            "text": note.text,
+                            "sort": note.sort,
                             "color": note.color.value,
                             "archived": note.archived,
                             "pinned": note.pinned,
-                            "timestamp": note.timestamps.created.timestamp(),
-                            "collaborators": note.collaborators.all()
+                            "trashed": note.trashed,
+                            "created": note.timestamps.created.timestamp(),
+                            "edited": note.timestamps.edited.timestamp(),
+                            "updated": note.timestamps.updated.timestamp(),
+                            "collaborators": note.collaborators.all(),
+                            "annotations": note.annotations.all()
                         }
                     else:
                         note_dict = {
                             "id": note.id,
+                            "type": note.type.name,
                             "title": note.title,
                             "text": note.text,
+                            "sort": note.sort,
                             "color": note.color.value,
                             "archived": note.archived,
                             "pinned": note.pinned,
-                            "timestamp": note.timestamps.created.timestamp(),
-                            "collaborators": note.collaborators.all()
+                            "trashed": note.trashed,
+                            "created": note.timestamps.created.timestamp(),
+                            "edited": note.timestamps.edited.timestamp(),
+                            "updated": note.timestamps.updated.timestamp(),
+                            "collaborators": note.collaborators.all(),
+                            "annotations": note.annotations.all()
                         }
-
                     note_json.append(note_dict)
-
                 print(json.dumps({"code": self.CODE_SUCCESS, "message": note_json}, sort_keys=True))
 
                 keep.sync()
@@ -358,7 +372,7 @@ class GoogleKeepManager:
                     if color is not None:
                         gnote.color = color
                     if labels is not None:
-                        label = keep.findLabel(labels)
+                        label = keep.findLabel(name, create=True)
                         gnote.labels.add(label)
                     if annotations is not None:
                         gnote.annotations = annotations
@@ -502,7 +516,6 @@ class GoogleKeepManager:
 
             if success:
                 label = keep.findLabel(name, create=True)
-                #label = keep.createLabel(name)
                 label_list = []
                 label_dict = {
                     "id": label.id,
@@ -512,6 +525,7 @@ class GoogleKeepManager:
                 if not label_list:
                     print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_LABEL_FOUND}))
                 else:
+                    keep.sync()
                     print(json.dumps({"code": self.CODE_SUCCESS, "message": label_list}, sort_keys=True))
             else:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))

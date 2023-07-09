@@ -43,20 +43,52 @@ class gkeep_display extends eqLogic
         echo $btn;
     }
 
-    public static function displayEqLogicThumbnailContainer($eqLogics) {
+    public static function displayEqLogicThumbnailContainer($eqLogics, $_option = null) {
+        switch ($_option) {
+            case 'pinned':
+                $option = $_option;
+                $val = true;
+                $text = '{{ÉPINGLÉ}}';
+                $icon = '<i class="fas fa-map-pin colored"></i>';
+                break;
+            case 'unpinned':
+                $option = 'pinned';
+                $val = false;
+                $text = '{{AUTRES}}';
+                $icon = '<i class="fas fa-map-pin"></i>';
+                break;
+            case 'archived':
+                $option = $_option;
+                $val = true;
+                $text = '{{ARCHIVÉ}}';
+                $icon = '<i class="fas fa-archive colored"></i>';
+                break;
+            case 'trashed':
+                $option = $_option;
+                $val = true;
+                $text = '{{SUPPRIMÉ}}';
+                $icon = '<i class="fas fa-trash colored"></i>';
+                break;
+            default:
+                $option = $_option;
+                $val = true;
+                $text = '';
+                $icon = '';
+        }
+
         echo '<div class="panel panel-default">';
         echo '    <h3 class="panel-title">';
-        echo '        <a id="accordiongkeep" class="accordion-toggle" data-toggle="collapse" data-parent="" href="#gkeep"><i class=""></i></a>';
-       // echo '        <a id="accordiongkeep" class="accordion-toggle" data-toggle="collapse" data-parent="" href="#gkeep_' . $_type . '"><i class="' . gkeep::getIconClass($_type) . '"></i> ' . gkeep::getDeviceLabel($_type) . '</a>';
+        echo '        <a id="accordiongkeep" class="accordion-toggle" data-toggle="collapse" data-parent="" href="#gkeep_' . $_option . '"> ' . $icon . ' ' . $text . '</a>';
         echo '    </h3>';
-        echo '    <div id="gkeep" class="panel-collapse collapse in">';
+        echo '    <div id="gkeep_' . $_option . '" class="panel-collapse collapse in">';
         echo '        <div class="eqLogicThumbnailContainer">';
         foreach ($eqLogics as $eqLogic) {
+            if ($_option != null && $eqLogic->getConfiguration($option) !== $val) continue;
             $additionalInfo = ($eqLogic->getIsVisible() == 1) ? '<i class="fas fa-eye" title="{{Équipement visible}}"></i>' : '<i class="fas fa-eye-slash" title="{{Équipement non visible}}"></i>';
 
             $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
             echo '            <div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-            echo '                <img src="' . $eqLogic->getImage() . '"/>';
+            echo '                <img class="imgColorFilter_' . $eqLogic->getConfiguration('color', 'DEFAULT') . '" src="' . $eqLogic->getImage() . '"/>';
             echo '                <br>';
             echo '                <span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
             echo '                <span class="hidden hiddenAsCard displayTableRight">' . $additionalInfo . '</span>';

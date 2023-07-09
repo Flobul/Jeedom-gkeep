@@ -90,7 +90,20 @@ $eqLogics = gkeep::byType('gkeep');
             <sup><i class="fas fa-question-circle tippied" data-title="{{Couleur de la note}}"></i></sup>
           </label>
           <div class="col-sm-9">
-            <input class="input-sm action action_colorpicker_change addNoteAttr" type="color" data-l1key="color" >
+            <select class="input-sm addNoteAttr" data-l1key="color" >
+              <option value="BLUE">{{Bleu}}</option>
+              <option value="BROWN">{{Marron}}</option>
+              <option value="CERULEAN">{{Bleu céruléen}}</option>
+              <option value="GRAY">{{Gris}}</option>
+              <option value="GREEN">{{Vert}}</option>
+              <option value="ORANGE">{{Orange}}</option>
+              <option value="PINK">{{Rose}}</option>
+              <option value="PURPLE">{{Violet}}</option>
+              <option value="RED">{{Rouge}}</option>
+              <option value="TEAL">{{Bleu sarcelle}}</option>
+              <option value="DEFAULT">{{Défaut}}</option>
+              <option value="YELLOW">{{Jaune}}</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
