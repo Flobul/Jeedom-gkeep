@@ -80,7 +80,7 @@ try {
         if (!is_object($cmd)) {
             throw new Exception(__('cmd gkeep non trouvée : ', __FILE__) . init('id'));
         }
-        ajax::success($eqLogic->addItem(init('item_id'), init('change')));
+        ajax::success($eqLogic->addItem(init('change')));
     }
 
     if (init('action') == 'deleteItem') {

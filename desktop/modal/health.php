@@ -20,7 +20,11 @@ if (!isConnect('admin')) {
 }
 $eqLogics = gkeep::byType('gkeep');
 ?>
-
+<style>
+    .label.label-default.coloredLabel[data-color=DEFAULT] {
+        color: black;
+    }
+</style>
 <table class="table table-condensed tablesorter" id="table_healthgkeep">
 	<thead>
 		<tr>
@@ -38,20 +42,21 @@ $eqLogics = gkeep::byType('gkeep');
         foreach ($eqLogics as $eqLogic) {
           echo '<tr><td><a href="' . $eqLogic->getLinkToConfiguration() . '" style="text-decoration: none;">' . $eqLogic->getHumanName(true) . '</a></td>';
 
-          echo '<td>' . $eqLogic->getConfiguration('type') . '</td>';
-
-          if ($eqLogic->getConfiguration('pinned', '') == true) {
-              $print = '<span class="label label-success" style="font-size : 1em; cursor : default;">{{Épinglé}}</span>';
+          echo '<td><span class="label label-info">' . $eqLogic->getConfiguration('type') . '</span></td>';
+          
+          $print = '';
+          if ($eqLogic->getConfiguration('pinned', false) === true) {
+              $print .= '<span class="label label-success" style="font-size : 1em; cursor : default;">{{Épinglé}}</span>';
           }
-          if ($eqLogic->getConfiguration('archived', '') == true) {
-              $print = '<span class="label label-warning" style="font-size : 1em; cursor : default;">{{Archivé}}</span>';
+          if ($eqLogic->getConfiguration('archived', false) === true) {
+              $print .= '<span class="label label-warning" style="font-size : 1em; cursor : default;">{{Archivé}}</span>';
           }
-          if ($eqLogic->getConfiguration('trashed', '') == true) {
-              $print = '<span class="label label-danger" style="font-size : 1em; cursor : default;">{{Supprimé}}</span>';
+          if ($eqLogic->getConfiguration('trashed', false) === true) {
+              $print .= '<span class="label label-danger" style="font-size : 1em; cursor : default;">{{Supprimé}}</span>';
           }
           echo '<td>' . $print . '</td>';
 
-          echo '<td><span class="label label-info" style="font-size : 1em; cursor : default;">' . $eqLogic->getConfiguration('color') . '</span></td>';
+          echo '<td><span class="label label-default coloredLabel" data-color="'.$eqLogic->getConfiguration('color').'" style="font-size : 1em; cursor : default;background-color:'.gkeep::getColor($eqLogic->getConfiguration('color')).' !important;">' . $eqLogic->getConfiguration('color') . '</span></td>';
 
           $colabo = $eqLogic->getConfiguration('collaborators', '');
           $printCo = '';

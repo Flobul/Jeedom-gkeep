@@ -1,0 +1,168 @@
+<div class="cmd cmd-widget #history#" data-type="info" data-subtype="string" data-template="default" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-order="#order#" data-eqLogic_id="#eqLogic_id#" draggable=true>
+    <div class="content-xs checkBoxList">
+        <span>
+            <input type="checkbox" class="checkBox">
+        </span> 
+        <strong class="state" data-id="#keepId#" contenteditable="true"></strong>
+        <span>
+            <a class="clickRemove" title="{{Annuler}}"><i class="fas fa-times"></i></a>
+        </span>
+    </div>
+    <style>
+      .dragging {
+          opacity: 0.5;
+      }
+      .checkBoxList {
+          display: block;
+          width: 200px;
+          text-align:left;
+      }
+      .checkBoxList .clickRemove {
+          display: none;
+      }
+      .checkBoxList:hover {
+          opacity: .6;
+      }
+      .checkBoxList:hover .clickRemove {
+          display: block;
+          font-size: 1.3em;
+          float: right;
+          margin-right: 10px;
+      }
+      .checkBoxList .clickRemove i {
+          color: red;
+      }
+      .checkBoxList .clickRemove:hover, .clickSend:hover{
+          opacity: .6;
+      }
+    </style>
+    <template></template>
+    <script>
+      jeedom.cmd.addUpdateFunction('#id#',function(_options) {
+        if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+          cmd.setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
+          cmd.querySelector('.state').empty().append(_options.display_value+' #unite#')
+          if ('#checked#' && '#checked#' != '#' + 'checked#') {
+              cmd.querySelector('.checkBox').checked = true;
+              cmd.querySelector('.state').style.textDecoration = 'line-through';
+          } else {
+              cmd.querySelector('.checkBox').checked = false;
+              cmd.querySelector('.state').style.textDecoration = 'none';
+          }
+          if (_options.alertLevel) {
+            if (_options.alertLevel == 'warning') {
+              cmd.addClass('label label-warning')
+              cmd.setAttribute('data-alertlevel','warning')
+            } else if (_options.alertLevel == 'danger') {
+              cmd.addClass('label label-danger')
+              cmd.setAttribute('data-alertlevel','danger')
+            } else {
+              cmd.removeClass('label label-warning label-danger')
+              cmd.setAttribute('data-alertlevel','none')
+            }
+          }
+        }
+      });
+      jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}])
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .checkBox').addEventListener('click', function(event) {
+          updateItem#id#({checked: event.target.checked});
+      })
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .state').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          updateItem#id#({text: event.target.innerText});
+        }
+      });
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .state').addEventListener('blur', function(event) {
+          if (event.target.innerText != '' && event.target.innerText != '#state#') {
+              updateItem#id#({text: event.target.innerText});
+          }
+      });
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragstart', function(event) {
+          event.dataTransfer.setData('text/plain', event.target.dataset.id);
+          document.querySelector('.cmd[data-cmd_uid=#uid#]').classList.add('dragging');
+      })
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragover', function(event) {
+        event.preventDefault();
+        var draggingElement = document.querySelector('.dragging');
+        var targetElement = event.target;
+        if (!draggingElement.contains(targetElement)) {
+          var containerElement = targetElement.parentElement;
+          containerElement.insertBefore(draggingElement, targetElement);
+        }
+      })
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#]').addEventListener('dragend', function(event) {
+         document.querySelector('.cmd[data-cmd_uid=#uid#]').classList.remove('dragging');
+      });
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .clickRemove').addEventListener('click', function(event) {
+          deleteItem#id#();
+      });
+
+      function updateItem#id#(_change) {
+        $.ajax({
+          type: "POST",
+          url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
+          data: {
+            action: "checkItem",
+            eqLogic_id: "#eqLogic_id#",
+            cmd_id: "#id#",
+            item_id: "#keepId#",
+            change: _change
+          },
+          dataType: 'json',
+          error: function(request, status, error) {
+            handleAjaxError(request, status, error);
+          },
+          success: function(data) {
+            if (data.state != 'ok') {
+              $.fn.showAlert({
+                message: data.result,
+                level: 'danger'
+              });
+              return;
+            }
+            if (data.code == 0) {
+                jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: _change.text}]);
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .state').innerText = '';
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .hiddenAddItem').style.display = "none";
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .clickPlus').style.display = "contents";
+                document.querySelector('.cmd[data-cmd_uid=#uid#] .checkBoxList').style.opacity = .5;
+            }
+          }
+        })
+      }
+      function deleteItem#id#() {
+        $.ajax({
+          type: "POST",
+          url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
+          data: {
+            action: "deleteItem",
+            eqLogic_id: "#eqLogic_id#",
+            cmd_id: "#id#",
+            item_id: "#keepId#"
+          },
+          dataType: 'json',
+          error: function(request, status, error) {
+            handleAjaxError(request, status, error);
+          },
+          success: function(data) {
+            if (data.state != 'ok') {
+              $.fn.showAlert({
+                message: data.result,
+                level: 'danger'
+              });
+              return;
+            }
+            if (data.code == 0) {
+                console.log(data)
+            }
+          }
+        })
+      }
+    </script>
+</div>

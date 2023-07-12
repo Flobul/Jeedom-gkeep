@@ -1,0 +1,97 @@
+<div class="cmd cmd-widget #history#" data-type="info" data-subtype="string" data-template="default" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-order="#order#" data-eqLogic_id="#eqLogic_id#" draggable=true>
+    <div class="content-xs textList">
+        <pre class="stateText" data-id="#id#" contenteditable="true"></pre>
+        <span>
+            <a class="btn btn-success btn-sm sendButton" title="{{Modifier}}"><i class="fas fa-file-export"></i></a>
+        </span>
+    </div>
+    <style>
+      .cmd[data-cmd_uid="#uid#"] .dragging {
+          opacity: 0.5;
+      }
+      .cmd[data-cmd_uid="#uid#"] .textList {
+          display: block;
+          text-align:left;
+      }
+      .cmd[data-cmd_uid="#uid#"] .stateText {
+          height: auto;
+          max-height: #height#;
+          width: #width#;
+          overflow: auto;
+          word-break: normal !important;
+          word-wrap: normal !important;
+          white-space: pre !important;
+      }
+      .cmd[data-cmd_uid="#uid#"] .sendButton {
+          display: none;
+      }
+      .cmd[data-cmd_uid="#uid#"] pre {
+          background-color: rgba(255, 255, 255, 0.25) !important;
+      }
+    </style>
+    <template></template>
+    <script>
+      jeedom.cmd.addUpdateFunction('#id#',function(_options) {
+        if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+          cmd.setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
+          cmd.querySelector('.stateText').empty().append(_options.display_value+' #unite#')
+          if (_options.alertLevel) {
+            if (_options.alertLevel == 'warning') {
+              cmd.addClass('label label-warning')
+              cmd.setAttribute('data-alertlevel','warning')
+            } else if (_options.alertLevel == 'danger') {
+              cmd.addClass('label label-danger')
+              cmd.setAttribute('data-alertlevel','danger')
+            } else {
+              cmd.removeClass('label label-warning label-danger')
+              cmd.setAttribute('data-alertlevel','none')
+            }
+          }
+        }
+      });
+      jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#'}])
+
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').addEventListener('input', function(event) {
+        if (event.target.innerHTML !== '#state#') {
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').style.display = 'block';
+        } else {
+          document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').style.display = 'none';
+        }
+      });
+      
+      document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').addEventListener('click', function(event) {
+        console.log('click',document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML)
+          if (document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML != '') {
+              updateNote#id#({text: document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML});
+          }
+      });
+      function updateNote#id#(_change) {
+        $.ajax({
+          type: "POST",
+          url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
+          data: {
+            action: "updateNote",
+            eqLogic_id: "#eqLogic_id#",
+            cmd_id: "#id#",
+            change: _change
+          },
+          dataType: 'json',
+          error: function(request, status, error) {
+            handleAjaxError(request, status, error);
+          },
+          success: function(data) {
+            if (data.state != 'ok') {
+              $.fn.showAlert({
+                message: data.result,
+                level: 'danger'
+              });
+              return;
+            }
+            if (data.code == 0) {
+                jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: _change.text}]);
+            }
+          }
+        })
+      }
+    </script>
+</div>

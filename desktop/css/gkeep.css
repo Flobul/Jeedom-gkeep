@@ -30,7 +30,6 @@
 .logoPrimaryGkeep .fas {
     background-color: #fbbc04;
     -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .logoSecondaryGkeep[id="bt_addgkeep"] {
@@ -47,12 +46,49 @@
 #accordiongkeep:hover {
     opacity: .65
 }
-#accordiongkeep i.fas.fa-map-pin.colored,
-#accordiongkeep i.fas.fa-archive.colored {
-    color: orangered;  
+.eqLogicThumbnailDisplay i.fas.fa-map-pin.colored,
+.eqLogicThumbnailDisplay i.fas.fa-archive.colored {
+    color: darkorange;  
 }
-#accordiongkeep i.fas.fa-trash.colored {
+.eqLogicThumbnailDisplay i.fas.fa-trash.colored {
     color: red;  
+}
+.eqLogicThumbnailDisplay i.fas.fa-eye.colored,
+.eqLogicThumbnailDisplay i.fas.fa-check.colored {
+    color: var(--bt-success-color) !important;  
+}
+
+.eqLogicThumbnailDisplay span.hiddenAsCard .btn.w30 {
+  width: 30px;
+}
+
+.eqLogicThumbnailDisplay span.hiddenAsTable {
+  z-index: 1;
+  position: relative;
+}
+.eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-eye {
+  font-size:0.9em !important;
+  position:absolute;
+  margin-top:22px;
+  margin-left:8px;
+}
+.eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-map-pin {
+  font-size:0.9em !important;
+  position:absolute;
+  margin-top:70px;
+  margin-left:10px;
+}
+.eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-archive {
+  font-size:0.9em !important;
+  position:absolute;
+  margin-top:70px;
+  margin-left:32px;
+}
+.eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-trash {
+  font-size:0.9em !important;
+  position:absolute;
+  margin-top:70px;
+  margin-left:58px;
 }
 
 .imgColorFilter_ORANGE {

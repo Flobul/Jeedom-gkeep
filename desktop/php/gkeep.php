@@ -42,7 +42,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
           gkeep_display::displayActionCard('{{Suppression de tous les appareils}}', 'fa-trash-alt', 'data-action="delete" data-action2="all"', 'logoTrashGkeep');
         ?>
     </div>
-    <legend><i class="icon kiko-smart-house"></i> {{Mes notes}}</legend>
+    <legend><i class="icon fas fa-sticky-note"></i> {{Mes notes}}</legend>
 		<?php
             if (count($eqLogics) == 0) {
                 echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement trouvé, cliquez sur "Synchronisation" pour commencer}}</div>';
@@ -83,7 +83,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <fieldset>
               <div class="form-group">
                 <legend><i class="fas fa-sitemap icon_green"></i> {{Général}}</legend>
-                <label class="col-sm-4 control-label">{{Nom de la note}}</label>
+                <label class="col-sm-4 control-label">{{Nom du vidéoprojecteur}}</label>
                 <div class="col-sm-5">
                   <input type="text" class="eqLogicAttr form-control" data-l1key="id" style="display : none;" />
                   <input type="text" class="eqLogicAttr form-control" data-l1key="name" placeholder="{{Nom de la box}}" />

@@ -83,16 +83,19 @@ class gkeep_display extends eqLogic
         echo '    <div id="gkeep_' . $_option . '" class="panel-collapse collapse in">';
         echo '        <div class="eqLogicThumbnailContainer">';
         foreach ($eqLogics as $eqLogic) {
-            if ($_option != null && $eqLogic->getConfiguration($option) !== $val) continue;
-            $additionalInfo = ($eqLogic->getIsVisible() == 1) ? '<i class="fas fa-eye" title="{{Équipement visible}}"></i>' : '<i class="fas fa-eye-slash" title="{{Équipement non visible}}"></i>';
+            if ($eqLogic->getConfiguration($option, false) === $val) {
+                $visibleInfo = ($eqLogic->getIsVisible() == 1) ? '<i class="fas fa-eye" title="{{Équipement visible}}"></i>' : '<i class="fas fa-eye-slash" title="{{Équipement non visible}}"></i>';
+                //$additionalInfo = ($eqLogic->getConfiguration('pinned') === true) ? '<i class="fas fa-map-pin colored" title="{{Épinglé}}"></i>' : '<i class="fas fa-map-pin" title="{{Autre}}"></i>';
 
-            $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-            echo '            <div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-            echo '                <img class="imgColorFilter_' . $eqLogic->getConfiguration('color', 'DEFAULT') . '" src="' . $eqLogic->getImage() . '"/>';
-            echo '                <br>';
-            echo '                <span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
-            echo '                <span class="hidden hiddenAsCard displayTableRight">' . $additionalInfo . '</span>';
-            echo '            </div>';
+                $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
+                echo '            <div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                echo '                <span class="hiddenAsTable"></span>';
+                echo '                <img class="imgColorFilter_' . $eqLogic->getConfiguration('color', 'DEFAULT') . '" src="' . $eqLogic->getImage()['img'] . '"/>';
+                echo '                <br>';
+                echo '                <span class="name">' . $eqLogic->getHumanName(true, true) . '</span>';
+                echo '                <span class="hidden hiddenAsCard displayTableRight">' . $visibleInfo . '</span>';
+                echo '            </div>';
+            }
         }
         echo '        </div>';
         echo '    </div>';

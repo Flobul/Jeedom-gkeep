@@ -110,59 +110,119 @@ function addCmdToTable(_cmd) {
   });
 }
 
-$('.changeIncludeState').on('click', function() {
-  var el = $(this);
-  var state = $(this).attr('data-state');
-  jeedom.config.save({
-    plugin: 'gkeep',
-    configuration: {
-      include_mode: el.attr('data-state')
+$(document).ready(function() {
+  jeedom.eqLogic.byType({
+    type: 'gkeep',
+    noCache: true,
+    error: function (error) {
+      $.fn.showAlert({message: error.message, level: 'warning'});
     },
-    error: function(error) {
-      $.fn.showAlert({
-        message: error.message,
-        level: 'danger'
-      });
-    },
-    success: function() {
-      if (el.attr('data-state') == 1) {
-        $.hideAlert();
-        $('.changeIncludeState:not(.card)').removeClass('btn-default').addClass('btn-success');
-        $('.changeIncludeState').attr('data-state', 0);
-        $('.changeIncludeState.card').css('background-color', '#8000FF');
-        $('.changeIncludeState.card span center').text('{{Arrêter l\'inclusion}}');
-        $('.changeIncludeState:not(.card)').html('<i class="fa fa-sign-in fa-rotate-90"></i> {{Arrêter l\'inclusion}}');
-        $.fn.showAlert({
-          message: '{{Vous êtes en mode inclusion. Cliquez à nouveau sur le bouton d\'inclusion pour sortir de ce mode}}',
-          level: 'warning'
-        });
-      } else {
-        $.hideAlert();
-        $('.changeIncludeState:not(.card)').addClass('btn-default').removeClass('btn-success btn-danger');
-        $('.changeIncludeState').attr('data-state', 1);
-        $('.changeIncludeState:not(.card)').html('<i class="fa fa-sign-in fa-rotate-90"></i> {{Mode inclusion}}');
-        $('.changeIncludeState.card span center').text('{{Mode inclusion}}');
-        $('.changeIncludeState.card').css('background-color', '#ffffff');
-        $.fn.hideAlert();
+    success: function(_eqLogics) {
+      for (var i in _eqLogics) {
+        updateDisplayCard($('.eqLogicDisplayCard[data-eqlogic_id=' + _eqLogics[i].id + ']'), _eqLogics[i]);
       }
     }
   });
 });
 
-$('body').on('gkeep::includeDevice', function(_event, _options) {
-  if (modifyWithoutSave) {
-    $.fn.showAlert({
-      message: '{{Un périphérique vient d\'être inclu/exclu. Veuillez réactualiser la page}}',
-      level: 'warning'
-    });
-  } else {
-    if (_options == '') {
-      window.location.reload();
+
+
+updateDisplayCard = function (_card, _eq) {
+	// Set visibility
+	if (_eq.isEnable == '1') {
+		_card.removeClass('disableCard');
     } else {
-      window.location.href = 'index.php?v=d&p=gkeep&m=gkeep&id=' + _options;
+		_card.addClass('disableCard');
     }
-  }
-});
+    var asTable = '';
+  	asTable += asTableHelper(_eq, 'visible', 'fas fa-eye', 'fas fa-eye-slash');
+	asTable += asTableHelper(_eq, 'pinned', 'fas fa-map-pin', 'fas fa-map-pin');
+	asTable += asTableHelper(_eq, 'archived', 'fas fa-archive', 'fas fa-archive');
+	asTable += asTableHelper(_eq, 'trashed', 'fas fa-trash', 'fas fa-trash');
+	_card.find('span.hiddenAsTable').empty().html(asTable);
+
+	var asCard = '';
+	asCard += asCardHelper(_eq, 'enable', '{{Activé}}', '{{Désactivé}}', 'roundedLeft fas fa-check', 'roundedLeft fas fa-times');
+	asCard += asCardHelper(_eq, 'visible', '{{Visible}}', '{{Masqué}}', 'fas fa-eye', 'fas fa-eye-slash');
+	asCard += asCardHelper(_eq, 'pinned', '{{Épinglé}}', '{{Autre}}', 'fas fa-map-pin', 'fas fa-map-pin');
+	asCard += asCardHelper(_eq, 'archived', '{{Archivé}}', '{{Non archivé}}', 'fas fa-archive',  'fas fa-archive');
+	asCard += asCardHelper(_eq, 'trashed', '{{Supprimé}}', '{{En cours}}', 'fas fa-trash', 'fas fa-trash');
+	asCard += '<a class="btn btn-xs cursor roundedRight"><i class="fas fa-cogs eqLogicAction tooltips" title="{{Configuration avancée}}" data-action="confEq"></i></a>';
+	_card.find('span.hiddenAsCard').empty().html(asCard);
+
+	_card.find('.eqLogicAction[data-action=confEq]').off('click').on('click', function() {
+		$('#md_modal').dialog().load('index.php?v=d&modal=eqLogic.configure&eqLogic_id=' + _eq.id).dialog('open');
+	});
+}
+
+asTableHelper = function(_eq, _item, aClass, unaClass) {
+    var colored = '';
+    var iClass = '';
+    if (_item == 'enable') {
+      if (_eq.isEnable == '1') {
+        colored = ' colored';
+        iClass = aClass;
+      } else {
+        colored = '';
+        iClass = unaClass;
+      }
+    } else if (_item == 'visible') {
+      if (_eq.isVisible == '1') {
+        colored = ' colored';
+        iClass = aClass;
+      } else {
+        colored = '';
+        iClass = unaClass;
+      }
+    } else {
+      if(["true", true, 1, "1"].includes(_eq.configuration[_item])) {
+        colored = ' colored';
+        iClass = aClass;
+      } else {
+        colored = '';
+        iClass = unaClass;
+      }
+    }
+	return '<i class="' + iClass + colored + '"></i>';
+}
+
+asCardHelper = function(_eq, _item, _name, _unname, aClass, unaClass) {
+    var name = '';
+    var colored = '';
+    var iClass = '';
+    if (_item == 'enable') {
+      if (_eq.isEnable == '1') {
+        name = _name;
+        colored = ' colored';
+        iClass = aClass;
+      } else {
+        name = _unname;
+        colored = '';
+        iClass = unaClass;
+      }
+    } else if (_item == 'visible') {
+      if (_eq.isVisible == '1') {
+        name = _name;
+        colored = ' colored';
+        iClass = aClass;
+      } else {
+        name = _unname;
+        colored = '';
+        iClass = unaClass;
+      }
+    } else {
+      if(["true", true, 1, "1"].includes(_eq.configuration[_item])) {
+        colored = ' colored';
+        name = _name;
+        iClass = aClass;
+      } else {
+        colored = '';
+        name = _unname;
+        iClass = unaClass;
+      }
+    }
+    return '<a class="btn btn-xs cursor w30"><i class="' + iClass + colored + ' tooltips" title="' + name + '"></i></a>';
+}
 
 $('#bt_healthgkeep').on('click', function() {
   $('#md_modal').dialog({
@@ -189,10 +249,7 @@ $('#bt_documentationgkeep').off('click').on('click', function() {
   window.open($(this).attr("data-location"), "_blank", null);
 });
 
-
-
-function printEqLogic(_eqLogic) {
-
+printEqLogic = function(_eqLogic) {
   $.ajax({
     type: "POST",
     url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
@@ -213,10 +270,12 @@ function printEqLogic(_eqLogic) {
         return;
       }
       if (data.result != '') {
-        $('#img_device').attr("src", data.result);
+        $('#img_device').attr("src", data.result.img);
+        $('#img_device').addClass("imgColorFilter_" + data.result.color);
       }
     }
   })
+  $('#table_infoseqlogic .eqLogicAttr').removeClass('eqLogicAttr');
 }
 
 $('#bt_addgkeep').on('click', function() {
@@ -230,7 +289,7 @@ $('#bt_synchronizegkeep').on('click', function() {
   synchronize();
 });
 
-function synchronize() {
+synchronize = function() {
   $.fn.showAlert({
     message: '{{Synchronisation en cours}}',
     level: 'warning'

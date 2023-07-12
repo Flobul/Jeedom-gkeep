@@ -2,14 +2,18 @@
 
 """
 Auteur: Flobul <flobul.jeedom@gmail.com>
-Version: 0.9
+Version: 1.0
 Description: This script manages Google Keep notes using the gkeepapi library. It allows you to interact with your Google Keep account, create, retrieve, update, and delete notes, as well as manage labels and annotations. The script uses the keyring library to securely store authentication credentials. It provides a command-line interface with various options for performing different operations on your Google Keep notes.
 """
 
 import keyring
 import gkeepapi
 import json
+import urllib.request
 import argparse
+import os
+import mimetypes
+import time
 
 class GoogleKeepManager:
     CODE_SUCCESS = 0
@@ -19,8 +23,9 @@ class GoogleKeepManager:
     MSG_FAILED_SAVE_MASTER_TOKEN = "Failed to save master token."
     MSG_NO_NOTE_FOUND = "No note found with the specified ID."
     MSG_FAILED_RESUME_SESSION = "Failed to resume session. Please check credentials and master token."
-    MSG_NOTE_CREATED = "Note created successfully."
     MSG_LIST_CREATED = "List created successfully."
+    MSG_NOTE_CREATED = "Note created successfully."
+    MSG_NOTE_DOWNLOADED = "Note downloaded successfully."
     MSG_NOTE_DELETED = "Note has been deleted."
     MSG_NOTE_RESTORED = "Note has been restored."
     MSG_NOTE_ARCHIVED = "Note has been archived."
@@ -28,15 +33,26 @@ class GoogleKeepManager:
     MSG_NOTE_PINNED = "Note has been pinned."
     MSG_NOTE_UNPINNED = "Note has been unpinned."
     MSG_NOTE_MODIFIED = "Note has been modified."
+    MSG_NOTE_FOUND = "Notes has been found."
     MSG_NOTE_NOT_IN_LIST = "The note with the specified ID is not a list."
+    MSG_NOTES_DOWNLOADED = "Notes downloaded successfully."
     MSG_ITEM_ADDED = "Item added successfully."
     MSG_ITEM_MODIIED = "Item has been modified."
     MSG_ITEM_DELETED = "Item has been deleted."
     MSG_NO_ITEM_FOUND = "No item found with the specified ID."
     MSG_NO_LABEL_FOUND = "No label found."
     MSG_LABEL_CREATED = "Label created successfully."
+    MSG_LABEL_FOUND = "Label has been found."
+    ERROR_MISSING_NOTE_ID = "Error: note ID required."
+    ERROR_MISSING_ITEM_ID = "Error: item ID required."
+    ERROR_MISSING_LABEL_NAME ="Error: label name required."
+    ERROR_INVALID_CMD = "Error: Invalid command."
+    ERROR_MISSING_USERNAME = "Error: Username is required."
 
     def __init__(self, username):
+        self.path = '/var/www/html/plugins/gkeep/data'
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
         self.username = username
         self.master_token = None
 
@@ -60,6 +76,107 @@ class GoogleKeepManager:
             print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_MASTER_TOKEN_FOUND}))
             return None
 
+    def detect_file_type(self, file_path):
+        file_signatures = {
+            b"\xFF\xD8\xFF": "image/jpeg",
+            b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A": "image/png",
+            b"\x47\x49\x46\x38\x37\x61": "image/gif",
+            b"\x49\x44\x33": "audio/mp3",
+            b"\x66\x74\x79\x70\x4D\x34\x41\x20": "audio/aac",
+            b"\x00\x00\x00\x18\x66\x74\x79\x70\x33\x67\x70\x34": "video/3gpp",
+            b"\x00\x00\x00\x14\x66\x74\x79\x70\x4D\x34\x41\x20": "video/mp4",
+            b"\x52\x49\x46\x46": "image/webp",
+            b"\x00\x00\x00\x0C\x4A\x58\x4C\x20\x0D\x0A\x87\x0A": "image/jxl",
+            b"\x00\x00\x01\xB3": "video/mpeg",
+            b"\x00\x00\x01\xBA": "video/mpeg",
+            b"\x00\x00\x00\x0C\x6A\x50\x20\x20\x0D\x0A\x87\x0A": "image/jp2",
+            b"\xFF\x4F\xFF\x51": "image/jp2",
+            b"\x02\x64\x73\x73": "audio/dss",
+            b"RIFF\x00\x00\x00\x00WEBPVP8 ": "image/webp",
+            b"\x1A\x45\xDF\xA3": "video/webm",
+            b"BM": "image/bmp",
+            b"II\x2A\x00": "image/tiff",
+            b"MM\x00\x2A": "image/tiff",
+            b"OggS": "audio/ogg",
+            b"fLaC": "audio/flac",
+            b"gimp xcf": "image/x-xcf",
+            b"#!SILK": "audio/silk",
+            b"\x25\x62\x69\x74\x6D\x61\x70": "image/vnd.microsoft.icon",
+            b"\x00\x00\x00\x20\x66\x74\x79\x70\x68\x65\x69\x63": "image/heic",
+            b"\x00\x00\x00\x0C\x6A\x50\x20\x20": "image/jp2",
+            b"\x00\x00\x00\x14\x66\x74\x79\x70": "video/3gpp",
+            b"\x00\x00\x00\x14\x66\x74\x79\x70\x69\x73\x6F\x6D": "video/mp4",
+            b"\x00\x00\x00\x14\x66\x74\x79\x70": "video/3gpp",
+            b"\x00\x00\x00\x18\x66\x74\x79\x70": "video/mp4",
+            b"\x00\x00\x00\x1C\x66\x74\x79\x70": "video/mp4",
+            b"\x00\x00\x00\x20\x66\x74\x79\x70": "video/3gpp2",
+            b"\x00\x00\x00\x20\x66\x74\x79\x70\x4D\x34\x41": "video/quicktime",
+            b"\x00\x00\x00\x20\x66\x74\x79\x70": "video/3gpp2",
+            b"\x00\x00\x01\xB3": "video/mpeg",
+            b"\x00\x00\x01\xBA": "video/mpeg",
+            b"\x0C\xED": "image/tiff",
+            b"\x1A\x45\xDF\xA3": "video/webm",
+            b"\x1A\x45\xDF\xA3": "video/x-matroska",
+            b"\x1A\x45\xDF\xA3\x93\x42\x82\x88": "video/x-matroska",
+            b"\x23\x21\x41\x4D\x52": "audio/amr",
+            b"\x23\x21\x53\x49\x4C\x4B\x0A": "audio/x-speex",
+            b"\x23\x3F\x52\x41\x44\x49\x41\x4E": "image/vnd.radiance",
+            b"\x2E\x52\x4D\x46\x00\x00\x00\x12": "audio/vnd.rn-realaudio",
+            b"\x2E\x72\x61\xFD\x00": "audio/vnd.rn-realaudio: ",
+            b"\x2E\x73\x6E\x64": "audio/basic",
+            b"\x30\x26\xB2\x75\x8E\x66\xCF\x11": "video/x-ms-wmv",
+            b"\x42\x4D": "image/bmp",
+            b"\x42\x50\x47\xFB": "image/bpg",
+            b"\x47\x49\x46\x38": "image/gif",
+            b"\x49\x20\x49": "image/tiff",
+            b"\x49\x44\x33": "audio/mpeg",
+            b"\x49\x44\x33\x03\x00\x00\x00": "audio/mpeg",
+            b"\x49\x49\x2A\x00": "image/tiff",
+            b"\x4D\x4D\x00\x2A": "image/tiff",
+            b"\x4D\x4D\x00\x2B": "image/tiff",
+            b"\x4D\x54\x68\x64": "audio/midi",
+            b"\x4D\x54\x68\x64": "audio/midi",
+            b"\x4E\x45\x53\x4D\x1A\x01": "audio/x-nsf",
+            b"\x4F\x67\x67\x53\x00\x02\x00\x00": "audio/ogg",
+            b"\x50\x35\x0A": "image/x-portable-graymap",
+            b"\x57\x41\x56\x45\x66\x6D\x74\x20": "audio/x-wav",
+            b"\x57\x45\x42\x50": "image/webp",
+            b"\x57\x4D\x4D\x50": "audio/mpeg",
+            b"\x66\x4C\x61\x43\x00\x00\x00\x22": "audio/flac",
+            b"\x66\x74\x79\x70\x33\x67\x70\x35": "video/mp4",
+            b"\x66\x74\x79\x70\x4D\x34\x41\x20": "audio/x-m4a",
+            b"\x66\x74\x79\x70\x4D\x34\x56\x20": "video/mp4",
+            b"\x66\x74\x79\x70\x4D\x53\x4E\x56": "video/mp4",
+            b"\x66\x74\x79\x70\x69\x73\x6F\x6D": "video/mp4",
+            b"\x66\x74\x79\x70\x6D\x70\x34\x32": "video/mp4",
+            b"\x66\x74\x79\x70\x71\x74\x20\x20": "video/quicktime",
+            b"\x69\x63\x6E\x73": "image/x-icon",
+            b"\x6D\x6F\x6F\x76": "video/quicktime",
+            b"\x66\x72\x65\x65": "video/quicktime",
+            b"\x6D\x64\x61\x74": "video/quicktime",
+            b"\x77\x69\x64\x65": "video/quicktime",
+            b"\x70\x6E\x6F\x74": "video/quicktime",
+            b"\x73\x6B\x69\x70": "video/quicktime",
+            b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A": "image/png",
+            b"\x97\x4A\x42\x32\x0D\x0A\x1A\x0A": "image/x-jbig2",
+            b"\xAB\x4B\x54\x58\x20\x31\x31\xBB\x0D\x0A\x1A\x0A": "image/ktx",
+            b"\xFF\xD8": "image/jpeg",
+            b"\xFF\xD8\xFF": "image/jpeg",
+            b"\xFF\xF1": "audio/aac",
+            b"\xFF\xF9": "audio/aac"
+        }
+
+        with open(file_path, "rb") as file:
+            # Lecture des premiers octets du fichier
+            file_header = file.read(8)
+
+        # Recherche de correspondances entre l'en-tête du fichier et les signatures connues
+        for signature, file_type in file_signatures.items():
+            if file_header.startswith(signature):
+                return file_type
+
+        return None
+
     def get_notes(self, note_id=None):
         master_token = self.get_master_token()
         if master_token:
@@ -71,93 +188,80 @@ class GoogleKeepManager:
                     gnote = keep.get(note_id)
                     if gnote:
                         annotations = [annotation.save() for annotation in gnote.annotations.all()]
-                        if isinstance(gnote, gkeepapi.node.List):
-                            items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in gnote.items]
-
-                            note_dict = {
-                                "id": gnote.id,
-                                "type": gnote.type.name,
-                                "title": gnote.title,
-                                "list": items,
-                                "text": gnote.text,
-                                "sort": gnote.sort,
-                                "color": gnote.color.value,
-                                "archived": gnote.archived,
-                                "pinned": gnote.pinned,
-                                "trashed": gnote.trashed,
-                                "created": gnote.timestamps.created.timestamp(),
-                                "edited": gnote.timestamps.edited.timestamp(),
-                                "updated": gnote.timestamps.updated.timestamp(),
-                                "collaborators": gnote.collaborators.all(),
-                                "annotations": annotations
-                            }
-                        else:
-                            note_dict = {
-                                "id": gnote.id,
-                                "type": gnote.type.name,
-                                "title": gnote.title,
-                                "text": gnote.text,
-                                "sort": gnote.sort,
-                                "color": gnote.color.value,
-                                "archived": gnote.archived,
-                                "pinned": gnote.pinned,
-                                "trashed": gnote.trashed,
-                                "created": gnote.timestamps.created.timestamp(),
-                                "edited": gnote.timestamps.edited.timestamp(),
-                                "updated": gnote.timestamps.updated.timestamp(),
-                                "collaborators": gnote.collaborators.all(),
-                                "annotations": annotations
-                            }
-                        print(json.dumps({"code": self.CODE_SUCCESS, "message": note_dict}, sort_keys=True))
+                        blobs = self.process_blobs(gnote.blobs, keep, gnote)
+                        note_dict = {
+                            "id": gnote.id,
+                            "type": gnote.type.name,
+                            "title": gnote.title,
+                            "text": gnote.text,
+                            "sort": gnote.sort,
+                            "color": gnote.color.value,
+                            "archived": gnote.archived,
+                            "pinned": gnote.pinned,
+                            "trashed": gnote.trashed,
+                            "created": gnote.timestamps.created.timestamp(),
+                            "edited": gnote.timestamps.edited.timestamp(),
+                            "updated": gnote.timestamps.updated.timestamp(),
+                            "collaborators": gnote.collaborators.all(),
+                            "annotations": annotations,
+                            "blobs": blobs
+                        }
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_DOWNLOADED, "result": note_dict}))
                     else:
                         print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
                 else:
                     gnotes = keep.all()
                     note_json = []
                     for note in gnotes:
-                        note_dict = {}
                         annotations = [annotation.save() for annotation in note.annotations.all()]
-                        if isinstance(note, gkeepapi.node.List):
-                            items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in note.items]
-                            note_dict = {
-                                "id": note.id,
-                                "type": note.type.name,
-                                "title": note.title,
-                                "list": items,
-                                "text": note.text,
-                                "sort": note.sort,
-                                "color": note.color.value,
-                                "archived": note.archived,
-                                "pinned": note.pinned,
-                                "trashed": note.trashed,
-                                "created": note.timestamps.created.timestamp(),
-                                "edited": note.timestamps.edited.timestamp(),
-                                "updated": note.timestamps.updated.timestamp(),
-                                "collaborators": note.collaborators.all(),
-                                "annotations": annotations
-                            }
-                        else:
-                            note_dict = {
-                                "id": note.id,
-                                "type": note.type.name,
-                                "title": note.title,
-                                "text": note.text,
-                                "sort": note.sort,
-                                "color": note.color.value,
-                                "archived": note.archived,
-                                "pinned": note.pinned,
-                                "trashed": note.trashed,
-                                "created": note.timestamps.created.timestamp(),
-                                "edited": note.timestamps.edited.timestamp(),
-                                "updated": note.timestamps.updated.timestamp(),
-                                "collaborators": note.collaborators.all(),
-                                "annotations": annotations
-                            }
+                        blobs = self.process_blobs(note.blobs, keep, note)
+                        note_dict = {
+                            "id": note.id,
+                            "type": note.type.name,
+                            "title": note.title,
+                            "text": note.text,
+                            "sort": note.sort,
+                            "color": note.color.value,
+                            "archived": note.archived,
+                            "pinned": note.pinned,
+                            "trashed": note.trashed,
+                            "created": note.timestamps.created.timestamp(),
+                            "edited": note.timestamps.edited.timestamp(),
+                            "updated": note.timestamps.updated.timestamp(),
+                            "collaborators": note.collaborators.all(),
+                            "annotations": annotations,
+                            "blobs": blobs
+                        }
                         note_json.append(note_dict)
-                    print(json.dumps({"code": self.CODE_SUCCESS, "message": note_json}, sort_keys=True))
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTES_DOWNLOADED, "result": note_json}))
                 keep.sync()
             else:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
+
+    def process_blobs(self, blobs, keep, note):
+        result = []
+        for idx, blob in enumerate(blobs):
+            url = keep.getMediaLink(blob)
+            file_name = f"{note.id}_{int(time.time())}"
+            file = os.path.join(self.path, file_name)
+            try:
+                urllib.request.urlretrieve(url, file)
+            except Exception as e:
+                logging.error(f"Error downloading blob file: {e}")
+                continue
+            
+            if os.path.isfile(file):
+                mime_type = self.detect_file_type(file)
+                extension = mimetypes.guess_extension(mime_type)
+                os.rename(file, file + extension)
+                blob_dict = {
+                    "url": url,
+                    "file": file + extension,
+                    "extension": extension,
+                    "mimetype": mime_type
+                }
+                result.append(blob_dict)
+        return result
 
     def create_note(self, title, text=None, color=None, archived=False, pinned=False, labels=None, annotations=None, collaborators=None, list_items=None):
         if not title:
@@ -254,8 +358,7 @@ class GoogleKeepManager:
                             "annotations": note.annotations.all()
                         }
                     note_json.append(note_dict)
-                print(json.dumps({"code": self.CODE_SUCCESS, "message": note_json}, sort_keys=True))
-
+                print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_FOUND, "result": note_json}))
                 keep.sync()
             else:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
@@ -483,7 +586,7 @@ class GoogleKeepManager:
                             "created": label.timestamps.created.timestamp(),
                             "updated": label.timestamps.updated.timestamp()
                         }
-                        print(json.dumps({"code": self.CODE_SUCCESS, "message": label_dict}, sort_keys=True))
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_LABEL_FOUND, "result": label_dict}))
                 elif labelid is not None:
                     label = keep.getLabel(labelid)
                     if not label:
@@ -495,7 +598,7 @@ class GoogleKeepManager:
                             "created": label.timestamps.created.timestamp(),
                             "updated": label.timestamps.updated.timestamp()
                         }
-                        print(json.dumps({"code": self.CODE_SUCCESS, "message": label_dict}, sort_keys=True))
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_LABEL_FOUND, "result": label_dict}))
                 else:
                     labels = keep.labels()
                     label_list = []
@@ -510,7 +613,7 @@ class GoogleKeepManager:
                     if not label_list:
                         print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_LABEL_FOUND}))
                     else:
-                        print(json.dumps({"code": self.CODE_SUCCESS, "message": label_list}, sort_keys=True))
+                        print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_LABEL_FOUND, "result": label_list}))
             else:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
@@ -532,7 +635,7 @@ class GoogleKeepManager:
                     print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_LABEL_FOUND}))
                 else:
                     keep.sync()
-                    print(json.dumps({"code": self.CODE_SUCCESS, "message": label_list}, sort_keys=True))
+                    print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_LABEL_CREATED, "result": label_list}))
             else:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
         else:
@@ -640,9 +743,8 @@ def main():
 
     # Vérifier si l'argument --username est fourni
     if not args.username:
-        print("Erreur : l'argument --username est requis.")
+        print(self.ERROR_MISSING_USERNAME)
         return
-
     # Exécuter la commande appropriée en fonction des arguments fournis
     if args.command == "save_master_token":
         manager.save_master_token(args.username, args.password)
@@ -686,45 +788,45 @@ def main():
         manager.search_notes(args.query)
     elif args.command == "delete_note":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.delete_note(args.note_id)
     elif args.command == "restore_note":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.restore_note(args.note_id)
     elif args.command == "archive_note":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.archive_note(args.note_id)
     elif args.command == "unarchive_note":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.unarchive_note(args.note_id)
     elif args.command == "pin_note":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.pin_note(args.note_id)
     elif args.command == "unpin_note":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.unpin_note(args.note_id)
     elif args.command == "modify_note":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.modify_note(args.note_id, args.title, args.text, args.color, args.labels, args.annotations, args.collaborators)
     elif args.command == "modify_item":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         if not args.item_id:
-            print("Erreur : l'identifiant de l'item est requis.")
+            print(self.ERROR_MISSING_ITEM_ID)
             return
         if args.checked:
             manager.modify_item(args.note_id, args.item_id, text=args.text, checked=True)
@@ -734,15 +836,15 @@ def main():
             manager.modify_item(args.note_id, args.item_id, text=args.text)
     elif args.command == "add_item":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         manager.add_item(args.note_id, args.text)
     elif args.command == "delete_item":
         if not args.note_id:
-            print("Erreur : l'identifiant de la note est requis.")
+            print(self.ERROR_MISSING_NOTE_ID)
             return
         if not args.item_id:
-            print("Erreur : l'identifiant de l'item est requis.")
+            print(self.ERROR_MISSING_ITEM_ID)
             return
         manager.delete_item(args.note_id, args.item_id)
     elif args.command == "get_label":
@@ -754,11 +856,11 @@ def main():
             manager.get_label()
     elif args.command == "create_label":
         if not args.name:
-            print("Erreur : le nom de l'étiquette est requis.")
+            print(self.ERROR_MISSING_LABEL_NAME)
             return
         manager.create_label(args.name)
     else:
-        print("Invalid command")
+        print(self.ERROR_INVALID_CMD)
 
 if __name__ == "__main__":
     main()
