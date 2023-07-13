@@ -102,64 +102,53 @@
 		<legend>
 		  <i class="fas fa-user-cog"></i> {{Authentification}}
 		</legend>
-
         <div class="form-group">
-          <label class="col-sm-2 control-label"><strong> {{Adresse email}}</strong>
-              <sup><i class="fas fa-question-circle" title="{{Entrez l'identifiant.}}"></i></sup>
+          <label class="col-sm-2 control-label"><strong> {{Nombre de comptes}}</strong>
+              <sup><i class="fas fa-question-circle" title="{{Entrez le nombre maximum de compte à synchroniser.}}"></i></sup>
           </label>
-          <div class="col-sm-4">
-            <input type="text" class="configKey form-control" data-l1key="email" placeholder="mon@email.com"></input>
+          <div class="col-sm-1">
+            <input type="number" min="1" max="10" class="configKey form-control" data-l1key="max_account_number" placeholder="1"></input>
           </div>
         </div>
+      
+        <?php for ($i = 1; $i <= config::byKey('max_account_number', 'gkeep'); $i++) { ?>
+        <div class="col-sm-6">
+          <legend><i class="fab fa-google"></i> {{Compte n°}}<?php echo $i ?></legend>
+          <div class="form-group">
+            <label class="col-sm-4 control-label"><strong> {{Adresse email}}</strong>
+                <sup><i class="fas fa-question-circle" title="{{Entrez l'identifiant.}}"></i></sup>
+            </label>
+            <div class="col-sm-6">
+              <input type="text" class="configKey form-control" data-l1key="email" data-l2key="<?php echo $i ?>" placeholder="mon@email.com"></input>
+            </div>
+          </div>
 
-        <div class="form-group">
-          <label class="col-sm-2 control-label"><strong> {{Mot de passe}}</strong>
-              <sup><i class="fas fa-question-circle" title="{{Entrez le mot de passe.}}"></i></sup>
-          </label>
-          <div class="input-group col-sm-2">
-              <input type="password" class="inputPassword configKey form-control" data-l1key="password" placeholder="password">
-              <span class="input-group-btn">
-                  <a class="btn btn-default form-control bt_showPass roundedRight"><i class="fas fa-eye"></i></a>
-              </span>
+          <div class="form-group">
+            <label class="col-sm-4 control-label"><strong> {{Mot de passe}}</strong>
+                <sup><i class="fas fa-question-circle" title="{{Entrez le mot de passe.}}"></i></sup>
+            </label>
+            <div class="input-group col-sm-6">
+                <input type="password" class="inputPassword configKey form-control" data-l1key="password" data-l2key="<?php echo $i ?>" placeholder="password">
+                <span class="input-group-btn">
+                    <a class="btn btn-default form-control bt_showPass roundedRight"><i class="fas fa-eye"></i></a>
+                </span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="col-sm-4 control-label"><strong> {{Première connexion}}</strong>
+                <sup><i class="fas fa-question-circle" title="{{Cliquez ici pour la première connexion.}}"></i></sup>
+            </label>
+            <div class="col-sm-6">
+               <a data-credential="<?php echo $i ?>" class="btn btn-success bt_getCredentials" style="width:30px"><i class="fas fa-user-circle"></i>{{}}</a>
+            </div>
           </div>
         </div>
+        <?php } ?>
 
-        <div class="form-group">
-          <label class="col-sm-2 control-label"><strong> {{Première connexion}}</strong>
-              <sup><i class="fas fa-question-circle" title="{{Cliquez ici pour la première connexion.}}"></i></sup>
-          </label>
-          <div class="col-sm-2">
-             <a id="bt_getCredentials" class="btn btn-success" style="width:30px"><i class="fas fa-user-circle"></i>{{}}</a>
-          </div>
-        </div>
       </div>
    </fieldset>
 </form>
-<script>
-       $('#bt_getCredentials').on('click', function() {
-          $.ajax({
-                type: "POST",
-                url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
-                data: {
-                  action: "getCredentials"
-                },
-                dataType: 'json',
-                error: function(request, status, error) {
-                  handleAjaxError(request, status, error);
-                },
-                success: function(data) {
-                  console.log(data)
-                  if (data.state != 'ok') {
-                    $('#div_alert').showAlert({
-                      message: data.result,
-                      level: 'danger'
-                    });
-                    return;
-                  }
-                }
-              });
-        });
 
-</script>
 
 <?php include_file('desktop', 'configuration', 'js', 'gkeep'); ?>

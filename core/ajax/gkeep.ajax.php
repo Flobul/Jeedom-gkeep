@@ -26,8 +26,8 @@ try {
 
 	ajax::init();
 
-    if (init('action') == 'getCredentials') {
-        $result = gkeep::login();
+    if (init('action') == 'login') {
+        $result = gkeep::login(init('id'));
         ajax::success($result);
     }
 

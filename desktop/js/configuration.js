@@ -59,3 +59,35 @@
          $('.configKey[data-l1key=idmobile]').hide();
       }
    });
+
+  $('.bt_getCredentials').on('click', function() {
+    var cred = $(this).data('credential');
+    $.ajax({
+      type: "POST",
+      url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
+      data: {
+        action: "login",
+        id: cred
+      },
+      dataType: 'json',
+      error: function(request, status, error) {
+        handleAjaxError(request, status, error);
+      },
+      success: function(data) {
+        console.log(data)
+        if (data.state != 'ok') {
+          $.fn.showAlert({
+            message: data.result,
+            level: 'danger'
+          });
+          return;
+        }
+        if (data.result[cred] && data.result[cred]['code'] == 0) {
+          $.fn.showAlert({
+            message: '{{Authentification réussie.}}',
+            level: 'success'
+          });
+        }
+      }
+    });
+  });

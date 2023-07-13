@@ -2,7 +2,7 @@
 
 """
 Auteur: Flobul <flobul.jeedom@gmail.com>
-Version: 1.1
+Version: 1.2
 Description: This script manages Google Keep notes using the gkeepapi library. It allows you to interact with your Google Keep account, create, retrieve, update, and delete notes, as well as manage labels and annotations. The script uses the keyring library to securely store authentication credentials. It provides a command-line interface with various options for performing different operations on your Google Keep notes.
 """
 
@@ -56,14 +56,15 @@ class GoogleKeepManager:
         self.username = username
         self.master_token = None
 
-    def save_master_token(self, password):
+    def save_master_token(self, username, password):
         keep = gkeepapi.Keep()
         success = keep.login(self.username, password)
 
         if success:
             master_token = keep.getMasterToken()
             keyring.set_password('google-keep-token', username, master_token)
-            print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_CREATED}))
+            result = {"username": username, "token": master_token}
+            print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_CREATED, "result": result}))
         else:
             print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_SAVE_MASTER_TOKEN}))
             return False
@@ -660,7 +661,7 @@ def main():
 
     # Commande "save_master_token"
     parser_save_master_token = subparsers.add_parser("save_master_token", help="Save master token")
-    parser_save_master_token.add_argument("password", help="Google account password")
+    parser_save_master_token.add_argument("--password", required=True, help="Google account password")
 
     # Commande "get_notes"
     parser_get_notes = subparsers.add_parser("get_notes", help="Get notes")
