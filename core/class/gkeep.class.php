@@ -28,7 +28,7 @@ class gkeep extends eqLogic
      *
      * @var string
      */
-    public static $_pluginVersion = '0.92';
+    public static $_pluginVersion = '0.93';
   
     /**
      * Tableau des templates.
@@ -242,6 +242,34 @@ class gkeep extends eqLogic
         }
     }
 
+    public static function compareEqLogic($a, $b) {
+        $pinnedA = $a->getConfiguration('pinned', false);
+        $pinnedB = $b->getConfiguration('pinned', false);
+        $archivedA = $a->getConfiguration('archived', false);
+        $archivedB = $b->getConfiguration('archived', false);
+        $sortA = $a->getConfiguration('sort', 0);
+        $sortB = $b->getConfiguration('sort', 0);
+
+        // Si les éqLogic sont épinglés et non archivés, ils sont prioritaires
+        if ($pinnedA && !$archivedA) {
+            if (!$pinnedB || $archivedB) {
+                return -1;
+            }
+        } elseif ($pinnedB && !$archivedB) {
+            return 1;
+        }
+
+        // Si les éqLogic sont archivés, ils sont placés en dernier
+        if ($archivedA && !$archivedB) {
+            return 1;
+        } elseif (!$archivedA && $archivedB) {
+            return -1;
+        }
+
+        // Si les éqLogic ont le même statut d'épinglage et d'archivage, on les trie par ordre décroissant
+        return $sortB - $sortA;
+    }
+  
     /**
      * Convertit une couleur de Google Keep en code couleur hexadécimal.
      *

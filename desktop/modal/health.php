@@ -19,6 +19,8 @@ if (!isConnect('admin')) {
     throw new Exception('401 Unauthorized');
 }
 $eqLogics = gkeep::byType('gkeep');
+
+usort($eqLogics, 'gkeep::compareEqLogic');
 ?>
 <style>
     .label.label-default.coloredLabel[data-color=DEFAULT] {
@@ -29,6 +31,7 @@ $eqLogics = gkeep::byType('gkeep');
 	<thead>
 		<tr>
 			<th>{{Appareil}}</th>
+			<th>{{Ordre}}</th>
 			<th>{{Type}}</th>
 			<th>{{Statut}}</th>
 			<th>{{Couleur}}</th>
@@ -41,6 +44,8 @@ $eqLogics = gkeep::byType('gkeep');
       <?php
         foreach ($eqLogics as $eqLogic) {
           echo '<tr><td><a href="' . $eqLogic->getLinkToConfiguration() . '" style="text-decoration: none;">' . $eqLogic->getHumanName(true) . '</a></td>';
+
+          echo '<td><span class="label label-info">' . $eqLogic->getConfiguration('sort') . '</span></td>';
 
           echo '<td><span class="label label-info">' . $eqLogic->getConfiguration('type') . '</span></td>';
           

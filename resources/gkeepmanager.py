@@ -2,7 +2,7 @@
 
 """
 Auteur: Flobul <flobul.jeedom@gmail.com>
-Version: 1.0
+Version: 1.1
 Description: This script manages Google Keep notes using the gkeepapi library. It allows you to interact with your Google Keep account, create, retrieve, update, and delete notes, as well as manage labels and annotations. The script uses the keyring library to securely store authentication credentials. It provides a command-line interface with various options for performing different operations on your Google Keep notes.
 """
 
@@ -206,6 +206,10 @@ class GoogleKeepManager:
                             "annotations": annotations,
                             "blobs": blobs
                         }
+                        if isinstance(gnote, gkeepapi.node.List):
+                            items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in gnote.items]
+                            note_dict["list"] = items
+
                         print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_DOWNLOADED, "result": note_dict}))
                     else:
                         print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_NOTE_FOUND}))
@@ -232,6 +236,10 @@ class GoogleKeepManager:
                             "annotations": annotations,
                             "blobs": blobs
                         }
+                        if isinstance(note, gkeepapi.node.List):
+                            items = [{"id": item.id, "text": item.text, "checked": item.checked, "sort": item.sort} for item in note.items]
+                            note_dict["list"] = items
+
                         note_json.append(note_dict)
                     print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTES_DOWNLOADED, "result": note_json}))
                 keep.sync()

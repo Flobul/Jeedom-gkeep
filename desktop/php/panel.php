@@ -4,7 +4,9 @@ if (!isConnect()) {
 }
 
 $gkeep_widgets = array();
-foreach (eqLogic::byType('gkeep') as $eqLogic) {
+$eqLogics = eqLogic::byType('gkeep');
+usort($eqLogics, 'gkeep::compareEqLogic');
+foreach ($eqLogics as $eqLogic) {
     $gkeep_widgets[] = array('widget' => $eqLogic->toHtml('dashboard'), 'type' => $eqLogic->getConfiguration('type'));
 }
 echo '<div class="div_displayEquipement" style="width: 100%;">';

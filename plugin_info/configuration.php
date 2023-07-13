@@ -125,11 +125,11 @@
         </div>
 
         <div class="form-group">
-          <label class="col-sm-2 control-label"><strong> {{Tester}}</strong>
-              <sup><i class="fas fa-question-circle" title="{{Entrez le mot de passe.}}"></i></sup>
+          <label class="col-sm-2 control-label"><strong> {{Première connexion}}</strong>
+              <sup><i class="fas fa-question-circle" title="{{Cliquez ici pour la première connexion.}}"></i></sup>
           </label>
           <div class="col-sm-2">
-             <a id="bt_getCredentials" class="btn btn-success" style="width:30px"><i class="fas fa-times"></i>{{}}</a>
+             <a id="bt_getCredentials" class="btn btn-success" style="width:30px"><i class="fas fa-user-circle"></i>{{}}</a>
           </div>
         </div>
       </div>

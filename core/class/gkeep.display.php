@@ -82,13 +82,20 @@ class gkeep_display extends eqLogic
         echo '    </h3>';
         echo '    <div id="gkeep_' . $_option . '" class="panel-collapse collapse in">';
         echo '        <div class="eqLogicThumbnailContainer">';
+        usort($eqLogics, 'gkeep::compareEqLogic');
         foreach ($eqLogics as $eqLogic) {
+
             if ($eqLogic->getConfiguration($option, false) === $val) {
                 $visibleInfo = ($eqLogic->getIsVisible() == 1) ? '<i class="fas fa-eye" title="{{Équipement visible}}"></i>' : '<i class="fas fa-eye-slash" title="{{Équipement non visible}}"></i>';
                 //$additionalInfo = ($eqLogic->getConfiguration('pinned') === true) ? '<i class="fas fa-map-pin colored" title="{{Épinglé}}"></i>' : '<i class="fas fa-map-pin" title="{{Autre}}"></i>';
+                $title = '{{Type}} : ' . ($eqLogic->getConfiguration('type')=='List'?'{{Liste}}':$eqLogic->getConfiguration('type'));
+                $title .= '</br>{{État}} : ' . (($eqLogic->getIsVisible() == 1)?'{{Visible}}':'{{Masqué}}');
+                $title .= $eqLogic->getConfiguration('pinned')?'</br>{{Statut}} : {{Épinglé}}':'';
+                $title .= $eqLogic->getConfiguration('archived')?'</br>{{Statut}} : {{Archivé}}':'';
+                $title .= $eqLogic->getConfiguration('trashed')?'</br>{{Statut}} : {{Supprimé}}':'';
 
                 $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-                echo '            <div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                echo '            <div title="'.$title.'" class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
                 echo '                <span class="hiddenAsTable"></span>';
                 echo '                <img class="imgColorFilter_' . $eqLogic->getConfiguration('color', 'DEFAULT') . '" src="' . $eqLogic->getImage()['img'] . '"/>';
                 echo '                <br>';
