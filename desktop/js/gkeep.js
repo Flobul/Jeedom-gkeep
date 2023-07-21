@@ -111,6 +111,19 @@ function addCmdToTable(_cmd) {
 }
 
 $(document).ready(function() {
+  jeedom.config.load({
+    plugin : 'gkeep',
+    configuration: 'selected_account',
+    error: function (error) {
+      $.fn.showAlert({message: error.message, level: 'danger'});
+    },
+    success: function (data) {
+      for (var i = 0; i < data.length; i++) {
+        updateLogoSelectGkeep(data[i].value, data[i].state);
+        hideDisplayCard(data[i].value, data[i].state);
+      }
+    }
+  });
   jeedom.eqLogic.byType({
     type: 'gkeep',
     noCache: true,
@@ -123,17 +136,24 @@ $(document).ready(function() {
       }
     }
   });
+
 });
 
+hideDisplayCard = function (_account, _state) {
+  var cards = $('.eqLogicDisplayCard[data-account="'+ _account +'"]');
+  cards.toggle(_state != "0" && _state != 0); 
+}
 
-
+updateLogoSelectGkeep = function (_val, _state) {
+    console.log(_val, _state )
+    var div = $('.eqLogicThumbnailContainer .logoSelectGkeep[data-value="'+ _val +'"]');
+    div.attr('data-state', _state);
+    div.find('i').addClass(parseInt(_state) != 1 ? 'fa-user-alt-slash' : 'fa-user').removeClass(parseInt(_state) != 1 ? 'fa-user' : 'fa-user-alt-slash');
+    div.css('opacity', parseInt(_state) != 1 ? 0.5 : 1);
+};
 updateDisplayCard = function (_card, _eq) {
 	// Set visibility
-	if (_eq.isEnable == '1') {
-		_card.removeClass('disableCard');
-    } else {
-		_card.addClass('disableCard');
-    }
+    _card.toggleClass('disableCard', _eq.isEnable !== '1');
     var asTable = '';
   	asTable += asTableHelper(_eq, 'visible', 'fas fa-eye', 'fas fa-eye-slash');
 	asTable += asTableHelper(_eq, 'pinned', 'fas fa-map-pin', 'fas fa-map-pin');
@@ -226,23 +246,9 @@ asCardHelper = function(_eq, _item, _name, _unname, aClass, unaClass) {
 
 $('#bt_healthgkeep').on('click', function() {
   $('#md_modal').dialog({
-    title: "{{Santé gkeep}}"
+    title: "{{Santé Google Keep}}"
   });
   $('#md_modal').load('index.php?v=d&plugin=gkeep&modal=health').dialog('open');
-});
-
-$('#bt_pushmessagesgkeep').on('click', function() {
-  $('#md_modal').dialog({
-    title: "{{Messages Push gkeep}}"
-  });
-  $('#md_modal').load('index.php?v=d&plugin=gkeep&modal=pushmessages').dialog('open');
-});
-
-$('#bt_firmwaregkeep').on('click', function() {
-  $('#md_modal').dialog({
-    title: "{{Firmware gkeep}}"
-  });
-  $('#md_modal').load('index.php?v=d&plugin=gkeep&modal=firmware').dialog('open');
 });
 
 $('#bt_documentationgkeep').off('click').on('click', function() {
@@ -315,7 +321,6 @@ synchronize = function() {
         });
         //return;
       } else {
-      console.log(data)
         $.fn.showAlert({
           message: '{{Synchronisation terminée}}',
           level: 'success'
@@ -363,9 +368,28 @@ $('.eqLogicAction[data-action=delete]').on('click', function(e) {
   });
 });
 
-$('#bt_showPrograms').on('click', function(e) {
-  $('#md_modal').dialog({
-    title: "{{Programmes gkeep}}"
-  });
-  $('#md_modal').load('index.php?v=d&plugin=gkeep&modal=schedule&id=' + $('.eqLogicAttr[data-l1key=id]').value()).dialog('open');
+$('.logoSelectGkeep').on('click', function () {
+    var el = $(this);
+    var value = el.attr('data-value');
+    var state = el.attr('data-state');
+    var newState = 1 - state;
+    this.setAttribute('data-state', newState);
+
+    var configuration = [];
+    $('.logoSelectGkeep').each(function (index) {
+        var value = $(this).attr('data-value');
+        var state = $(this).attr('data-state');
+        configuration.push({ value: value, state: state });
+    });
+    jeedom.config.save({
+        plugin: 'gkeep',
+        configuration: {selected_account: configuration},
+        error: function (error) {
+            $.fn.showAlert({ message: error.message, level: 'danger' });
+        },
+        success: function (data) {
+            updateLogoSelectGkeep(value, newState);
+            hideDisplayCard(value, newState);
+		}
+	});
 });

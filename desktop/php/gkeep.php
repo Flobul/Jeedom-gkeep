@@ -31,7 +31,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 <div class="row row-overflow">
   <div class="eqLogicThumbnailDisplay" style="border-left: solid 1px #EEE; padding-left: 25px;">
     <legend><i class="fa fa-cog"></i> {{Gestion}}</legend>
-    <div class="eqLogicThumbnailContainer">
+    <div class="eqLogicThumbnailContainer col-sm-8">
 
         <?php
           gkeep_display::displayActionCard('{{Synchronisation}}', 'fa-sync', 'id="bt_synchronizegkeep"', 'eqLogicAction logoPrimaryGkeep');
@@ -40,6 +40,14 @@ $eqLogics = eqLogic::byType($plugin->getId());
           gkeep_display::displayActionCard('{{Santé}}', 'fa-medkit', 'id="bt_healthgkeep"', 'logoSecondary');
           gkeep_display::displayActionCard('{{Documentation}}', 'fa-book-reader', 'id="bt_documentationgkeep" data-location="' . $plugin->getDocumentation() . '"', 'logoSecondary');
           gkeep_display::displayActionCard('{{Suppression de tous les appareils}}', 'fa-trash-alt', 'data-action="delete" data-action2="all"', 'logoTrashGkeep');
+          ?>
+    </div>
+    <div class="eqLogicThumbnailContainer col-sm-4">
+        <?php
+          for ($i = 1; $i <= config::byKey('max_account_number', 'gkeep'); $i++) {
+              $email = config::byKey('email', 'gkeep', '')[$i];
+              gkeep_display::displayActionCard($email, 'fa-user', 'data-action="selectAccount" data-l1key="selected_account" data-value="'.$email.'" data-state="0"', 'logoSelectGkeep');
+          }
         ?>
     </div>
     <legend><i class="icon fas fa-sticky-note"></i> {{Mes notes}}</legend>

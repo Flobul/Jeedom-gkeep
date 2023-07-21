@@ -19,6 +19,7 @@ if (!isConnect('admin')) {
     throw new Exception('401 Unauthorized');
 }
 $eqLogics = gkeep::byType('gkeep');
+$emails = config::byKey('email', 'gkeep');
 ?>
 <style>
     #table_createNoteGkeep .tableNote,
@@ -61,6 +62,20 @@ $eqLogics = gkeep::byType('gkeep');
     <form class="form-horizontal">
       <fieldset>
         <div class="form-group">
+          <label class="col-sm-3 control-label">{{Compte}} *
+            <sup><i class="fas fa-question-circle tippied" data-title="{{La note sera ajoutée à ce compte}}"></i></sup>
+          </label>
+          <div class="col-sm-4">
+            <select class="input-sm" id="accountNote" title="{{Compte de la note}}">
+              <?php
+                  foreach ($emails as $idAcc => $emailAcc) {
+                      echo '<option value="'.$emailAcc.'">'.$emailAcc.'</option>';
+                  }
+              ?>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
           <label class="col-sm-3 control-label">{{Titre}} *
             <sup><i class="fas fa-question-circle tippied" data-title="{{Titre de la note}}"></i></sup>
           </label>
@@ -91,6 +106,7 @@ $eqLogics = gkeep::byType('gkeep');
           </label>
           <div class="col-sm-9">
             <select class="input-sm addNoteAttr" data-l1key="color" >
+              <option value="" selected></option>
               <option value="BLUE">{{Bleu}}</option>
               <option value="BROWN">{{Marron}}</option>
               <option value="CERULEAN">{{Bleu céruléen}}</option>
@@ -205,7 +221,8 @@ $eqLogics = gkeep::byType('gkeep');
           url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
           data: {
             action: "addNote",
-            object: filteredNote
+            object: filteredNote,
+            account: document.querySelector('#accountNote').value
           },
           dataType: 'json',
           error: function(request, status, error) {

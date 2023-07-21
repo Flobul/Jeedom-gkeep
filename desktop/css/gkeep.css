@@ -36,6 +36,27 @@
     color: var(--al-success-color);
 }
 
+.logoSelectGkeep[data-action="selectAccount"] {
+    display: inline-flex;
+    width: 150px !important;
+}
+
+.logoSelectGkeep[data-action="selectAccount"]:hover {
+    opacity: .65;
+}
+
+.logoSelectGkeep[data-action="selectAccount"] span {
+    font-size: 10px !important;
+}
+
+.logoSelectGkeep[data-action="selectAccount"] i.fas {
+    font-size: 14px !important;
+}
+
+.logoSelectGkeep {
+    float: right;
+}
+
 .logoTrashGkeep[data-action2=all] {
     color: var(--al-danger-color);
 }
@@ -59,36 +80,52 @@
 }
 
 .eqLogicThumbnailDisplay span.hiddenAsCard .btn.w30 {
-  width: 30px;
+    width: 30px;
 }
 
 .eqLogicThumbnailDisplay span.hiddenAsTable {
-  z-index: 1;
-  position: relative;
+    z-index: 1;
+    position: relative;
 }
 .eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-eye {
-  font-size:0.9em !important;
-  position:absolute;
-  margin-top:22px;
-  margin-left:8px;
+    font-size:0.9em !important;
+    position:absolute;
+    margin-top:22px;
+    margin-left:8px;
 }
 .eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-map-pin {
-  font-size:0.9em !important;
-  position:absolute;
-  margin-top:70px;
-  margin-left:10px;
+    font-size:0.9em !important;
+    position:absolute;
+    margin-top:70px;
+    margin-left:10px;
 }
 .eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-archive {
-  font-size:0.9em !important;
-  position:absolute;
-  margin-top:70px;
-  margin-left:32px;
+    font-size:0.9em !important;
+    position:absolute;
+    margin-top:70px;
+    margin-left:32px;
 }
 .eqLogicThumbnailDisplay span.hiddenAsTable i.fas.fa-trash {
-  font-size:0.9em !important;
-  position:absolute;
-  margin-top:70px;
-  margin-left:58px;
+    font-size:0.9em !important;
+    position:absolute;
+    margin-top:70px;
+    margin-left:58px;
+}
+
+.eqLogicThumbnailContainer .logoSelectGkeep i.fa-user-alt-slash {
+    color:red;
+}
+
+.eqLogicThumbnailContainer .logoSelectGkeep i.fa-user {
+    color:green;
+}
+
+.eqLogicThumbnailContainer .logoSelectGkeep[data-state="1"] span {
+    font-style:normal;
+}
+
+.eqLogicThumbnailContainer .logoSelectGkeep[data-state="0"] span {
+    font-style:italic;
 }
 
 .imgColorFilter_ORANGE {
@@ -119,7 +156,7 @@
     filter: brightness(113%) saturate(0%) grayscale(100%);
 }
 .imgColorFilter_CERULEAN {
-    filter: filter: brightness(99%) contrast(84%) hue-rotate(184deg) saturate(55%) grayscale(1%) ;
+    filter: brightness(99%) contrast(84%) hue-rotate(184deg) saturate(55%) grayscale(1%);
 }
 .imgColorFilter_TEAL {
     filter: brightness(117%) contrast(117%) hue-rotate(136deg) saturate(65%) grayscale(44%);

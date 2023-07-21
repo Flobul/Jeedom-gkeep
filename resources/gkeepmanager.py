@@ -20,6 +20,7 @@ class GoogleKeepManager:
     CODE_ERROR = -1
 
     MSG_MASTER_TOKEN_CREATED = "Master token created successfully."
+    MSG_MASTER_TOKEN_EXISTS = "Master token exists."
     MSG_FAILED_SAVE_MASTER_TOKEN = "Failed to save master token."
     MSG_NO_NOTE_FOUND = "No note found with the specified ID."
     MSG_FAILED_RESUME_SESSION = "Failed to resume session. Please check credentials and master token."
@@ -69,9 +70,13 @@ class GoogleKeepManager:
             print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_SAVE_MASTER_TOKEN}))
             return False
 
-    def get_master_token(self):
-        self.master_token = keyring.get_password('google-keep-token', self.username)
+    def get_master_token(self, printIt = False):
+        if not self.master_token:
+            self.master_token = keyring.get_password('google-keep-token', self.username)
         if self.master_token:
+            if printIt:
+                result = {"username": self.username, "token": self.master_token}
+                print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_EXISTS, "result": result}))
             return self.master_token
         else:
             print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_MASTER_TOKEN_FOUND}))
@@ -293,10 +298,24 @@ class GoogleKeepManager:
                     gnote = keep.createNote(title, text)
                     print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_CREATED}))
 
-                if color is not None:
-                    gnote.color = color
                 gnote.archived = archived
                 gnote.pinned = pinned
+                if color is not None:
+                    color_map = {
+                        "BLUE": gkeepapi.node.ColorValue.Blue,
+                        "BROWN": gkeepapi.node.ColorValue.Brown,
+                        "CERULEAN": gkeepapi.node.ColorValue.DarkBlue,
+                        "GRAY": gkeepapi.node.ColorValue.Gray,
+                        "GREEN": gkeepapi.node.ColorValue.Green,
+                        "ORANGE": gkeepapi.node.ColorValue.Orange,
+                        "PINK": gkeepapi.node.ColorValue.Pink,
+                        "PURPLE": gkeepapi.node.ColorValue.Purple,
+                        "RED": gkeepapi.node.ColorValue.Red,
+                        "TEAL": gkeepapi.node.ColorValue.Teal,
+                        "DEFAULT": gkeepapi.node.ColorValue.White,
+                        "YELLOW": gkeepapi.node.ColorValue.Yellow,
+                    }
+                    gnote.color = color_map.get(color.upper(), gkeepapi.node.ColorValue.White)
                 if labels is not None:
                     label = keep.findLabel(labels, create=True)
                     gnote.labels.add(label)
@@ -654,6 +673,7 @@ def main():
     parser = argparse.ArgumentParser(description="Google Keep CLI for Jeedom")
 
     parser.add_argument('--username','-u', required=True, help="Google account username")
+    parser.add_argument('--token','-t', help="Google account token")
     parser.add_argument('--command','-c', help="Command to execute")
 
     # Arguments spécifiques à chaque commande
@@ -662,6 +682,9 @@ def main():
     # Commande "save_master_token"
     parser_save_master_token = subparsers.add_parser("save_master_token", help="Save master token")
     parser_save_master_token.add_argument("--password", required=True, help="Google account password")
+
+    # Commande "get_master_token"
+    parser_get_master_token = subparsers.add_parser("get_master_token", help="Get master token")
 
     # Commande "get_notes"
     parser_get_notes = subparsers.add_parser("get_notes", help="Get notes")
@@ -754,15 +777,19 @@ def main():
     if not args.username:
         print(self.ERROR_MISSING_USERNAME)
         return
+        
+    if args.token:
+        manager.master_token = args.token
     # Exécuter la commande appropriée en fonction des arguments fournis
     if args.command == "save_master_token":
         manager.save_master_token(args.username, args.password)
+    elif args.command == "get_master_token":
+        manager.get_master_token(True)
     elif args.command == "get_notes":
         if hasattr(args, 'note_id') and args.note_id:
             manager.get_notes(args.note_id)
         else:
             manager.get_notes()
-
     elif args.command == "create_note":
         if args.list:
             list_items = []

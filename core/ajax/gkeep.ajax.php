@@ -104,7 +104,7 @@ try {
     }
   
     if (init('action') == 'addNote') {
-        ajax::success(gkeep::addNote(init('object')));
+        ajax::success(gkeep::addNote(init('object'),init('account')));
     }
   
 	throw new Exception('Aucune methode correspondante');

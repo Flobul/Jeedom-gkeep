@@ -24,7 +24,7 @@
    }
    $plugin = plugin::byId('gkeep');
    sendVarToJS('version', gkeep::$_pluginVersion);
-
+   $token = config::byKey('token', 'gkeep');
    ?>
 
 <form class="form-horizontal">
@@ -143,9 +143,18 @@
                <a data-credential="<?php echo $i ?>" class="btn btn-success bt_getCredentials" style="width:30px"><i class="fas fa-user-circle"></i>{{}}</a>
             </div>
           </div>
+          <?php if ($token[$i]) { ?>
+            <div class="form-group">
+              <label class="col-sm-4 control-label"><strong> {{Jeton d'accès}}</strong>
+                  <sup><i class="fas fa-question-circle" title="{{Jeton d'accès généré}}"></i></sup>
+              </label>
+              <div class="col-sm-6">
+                <input type="text" text-editable="false" class="configKey form-control disabled" data-l1key="token" data-l2key="<?php echo $i ?>" placeholder="Jeton">
+              </div>
+            </div>
+          <?php } ?>
         </div>
         <?php } ?>
-
       </div>
    </fieldset>
 </form>

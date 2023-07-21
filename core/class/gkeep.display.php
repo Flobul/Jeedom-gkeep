@@ -95,7 +95,7 @@ class gkeep_display extends eqLogic
                 $title .= $eqLogic->getConfiguration('trashed')?'</br>{{Statut}} : {{Supprimé}}':'';
 
                 $opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
-                echo '            <div title="'.$title.'" class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
+                echo '            <div title="'.$title.'" class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '" data-account="' . $eqLogic->getConfiguration('account') . '">';
                 echo '                <span class="hiddenAsTable"></span>';
                 echo '                <img class="imgColorFilter_' . $eqLogic->getConfiguration('color', 'DEFAULT') . '" src="' . $eqLogic->getImage()['img'] . '"/>';
                 echo '                <br>';

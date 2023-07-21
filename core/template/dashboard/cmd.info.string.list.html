@@ -104,6 +104,7 @@
       });
 
       function updateItem#id#(_change) {
+        console.log(_change)
         $.ajax({
           type: "POST",
           url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
