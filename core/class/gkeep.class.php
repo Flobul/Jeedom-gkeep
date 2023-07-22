@@ -1109,11 +1109,12 @@ class gkeepCmd extends cmd
                 'order' => $this->getConfiguration('sort', '')
             );
         } else {
-            $calculatedHeight = intval($this->getEqlogic()->getDisplay('height')) - 100;
+            $calculatedHeight = intval($this->getEqlogic()->getDisplay('height', '400')) - 100;
+            $calculatedWidth = intval($this->getEqlogic()->getDisplay('width', '350')) - 17;
             $_options = array(
 			    'height' => $calculatedHeight . 'px',
-                'keepId' => $this->getConfiguration('id', ''),
-			    'width' => $this->getEqlogic()->getDisplay('width'),
+			    'width' => $calculatedWidth . 'px',
+                'keepId' => $this->getConfiguration('id', '')
             );
         }
         return parent::toHtml($_version, $_options);
