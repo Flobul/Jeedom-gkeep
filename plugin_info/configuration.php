@@ -51,11 +51,8 @@
             ?>
          <div class="col-lg-5">
             <div>
-               <i><a class="btn btn-primary btn-xs" target="_blank" href="https://flobul-domotique.fr/presentation-du-plugin-gkeep-pour-jeedom/"><i class="fas fa-book"></i><strong> {{Présentation du plugin}}</strong></a></i>
+               <i><a class="btn btn-primary btn-xs" target="_blank" href="https://flobul-domotique.fr/presentation-et-documentation-du-plugin-google-keep-pour-jeedom/"><i class="fas fa-book"></i><strong> {{Présentation du plugin}}</strong></a></i>
                <i><a class="btn btn-success btn-xs" target="_blank" href="<?=$plugin->getDocumentation()?>"><i class="fas fa-book"></i><strong> {{Documentation complète du plugin}}</strong></a></i>
-            </div>
-            <div>
-               <i> {{Les dernières actualités du plugin}} <a class="btn btn-label btn-xs" target="_blank" href="https://community.jeedom.com/t/plugin-gkeep-documentation-et-actualites/39994"><i class="icon jeedomapp-home-jeedom icon-gkeep"></i><strong>{{sur le community}}</strong></a>.</i>
             </div>
             <div>
                <i> {{Les dernières discussions autour du plugin}} <a class="btn btn-label btn-xs" target="_blank" href="https://community.jeedom.com/tags/plugin-gkeep"><i class="icon jeedomapp-home-jeedom icon-gkeep"></i><strong>{{sur le community}}</strong></a>.</i></br>
@@ -110,7 +107,7 @@
             <input type="number" min="1" max="10" class="configKey form-control" data-l1key="max_account_number" placeholder="1"></input>
           </div>
         </div>
-      
+
         <?php for ($i = 1; $i <= config::byKey('max_account_number', 'gkeep'); $i++) { ?>
         <div class="col-sm-6">
           <legend><i class="fab fa-google"></i> {{Compte n°}}<?php echo $i ?></legend>
