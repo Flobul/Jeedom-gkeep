@@ -22,14 +22,14 @@ require_once __DIR__ . "/../../../../core/php/core.inc.php";
 class gkeep extends eqLogic
 {
     /*     * *************************Attributs****************************** */
-  
+
     /**
      * Version du plugin.
      *
      * @var string
      */
-    public static $_pluginVersion = '0.95';
-  
+    public static $_pluginVersion = '0.96';
+
     /**
      * Tableau des templates.
      *
@@ -192,7 +192,7 @@ class gkeep extends eqLogic
                 throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
             }
             $cmd[$i] = ' --username ' . $email;
-            $cmd[$i] .= ' save_master_token';
+            $cmd[$i] .= ' get_master_token';
             $cmd[$i] .= ' --password ' . config::byKey('password', __CLASS__)[$i];
 
             $return[$i] = self::sendCmdAndFormatResult($cmd[$i]);
@@ -366,7 +366,7 @@ class gkeep extends eqLogic
         // Si les éqLogic ont le même statut d'épinglage et d'archivage, on les trie par ordre décroissant
         return $sortB - $sortA;
     }
-  
+
     /**
      * Convertit une couleur de Google Keep en code couleur hexadécimal.
      *
@@ -645,10 +645,10 @@ class gkeep extends eqLogic
         $cmd = system::getCmdSudo() . self::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py ' . $_command;
         log::add(__CLASS__, 'debug', __('Commande envoyée : ', __FILE__) . $cmd);
 
-        $result = shell_exec($cmd);
-        if ($result === false) {
-            throw new Exception(__('Erreur lors de l\'exécution de la commande : ', __FILE__) . $cmd);
-        }
+        exec($cmd . ' 2>&1', $output, $return_value);
+        $result = implode("\n", $output);
+
+        log::add(__CLASS__, 'debug', 'Résultat brut ' . $result);
         return $result;
     }
 
@@ -664,12 +664,12 @@ class gkeep extends eqLogic
         $result = self::executeCommand($cmd);
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Résultat brut ', __FILE__) . $result);
         $result_json = json_decode($result,true);
-        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat array ', __FILE__) . json_encode($result_json)); 
+        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat array ', __FILE__) . json_encode($result_json));
         if (is_array($result_json) && isset($result_json['code'])) {
             if ($result_json['code'] !== 0) {
                 log::add(__CLASS__, 'warning',__('Erreur lors de l\'exécution de la commande : ', __FILE__) . $cmd);
             }
-           log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat code ', __FILE__) . json_encode($result_json)); 
+           log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat code ', __FILE__) . json_encode($result_json));
             return $result_json;
         } else {
             log::add(__CLASS__, 'warning',__('Erreur lors de l\'exécution de la commande : ', __FILE__) . $cmd);
@@ -944,7 +944,7 @@ class gkeep extends eqLogic
 
 		$_version = jeedom::versionAlias($_version);
 		$replace['#calledFrom#'] = __CLASS__;
-        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat $_layout ', __FILE__) . $this->getDisplay('layout::' . $_version)); 
+        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat $_layout ', __FILE__) . $this->getDisplay('layout::' . $_version));
 		switch ($this->getDisplay('layout::' . $_version)) {
 			case 'table':
 				$replace['#eqLogic_class#'] = 'eqLogic_layout_table';
@@ -1035,7 +1035,7 @@ class gkeepCmd extends cmd
      * @var array
      */
     public static $_widgetPossibility = array('custom' => true);
-  
+
     /**
      * Exécute l'action spécifiée avec les options fournies.
      *

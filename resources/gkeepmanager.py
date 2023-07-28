@@ -2,11 +2,10 @@
 
 """
 Auteur: Flobul <flobul.jeedom@gmail.com>
-Version: 1.2
+Version: 1.3
 Description: This script manages Google Keep notes using the gkeepapi library. It allows you to interact with your Google Keep account, create, retrieve, update, and delete notes, as well as manage labels and annotations. The script uses the keyring library to securely store authentication credentials. It provides a command-line interface with various options for performing different operations on your Google Keep notes.
 """
 
-import keyring
 import gkeepapi
 import json
 import urllib.request
@@ -50,37 +49,27 @@ class GoogleKeepManager:
     ERROR_INVALID_CMD = "Error: Invalid command."
     ERROR_MISSING_USERNAME = "Error: Username is required."
 
-    def __init__(self, username):
+    def __init__(self, username, token):
         self.path = '/var/www/html/plugins/gkeep/data'
         if not os.path.exists(self.path):
             os.mkdir(self.path)
         self.username = username
-        self.master_token = None
+        self.token = token
 
-    def save_master_token(self, username, password):
+    def get_master_token(self, username, password, valOnly = False):
         keep = gkeepapi.Keep()
         success = keep.login(self.username, password)
 
         if success:
             master_token = keep.getMasterToken()
-            keyring.set_password('google-keep-token', username, master_token)
-            result = {"username": username, "token": master_token}
-            print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_CREATED, "result": result}))
+            if valOnly:
+                print(master_token)
+            else:
+                result = {"username": username, "token": master_token}
+                print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_CREATED, "result": result}))
         else:
             print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_SAVE_MASTER_TOKEN}))
             return False
-
-    def get_master_token(self, printIt = False):
-        if not self.master_token:
-            self.master_token = keyring.get_password('google-keep-token', self.username)
-        if self.master_token:
-            if printIt:
-                result = {"username": self.username, "token": self.master_token}
-                print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_EXISTS, "result": result}))
-            return self.master_token
-        else:
-            print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_NO_MASTER_TOKEN_FOUND}))
-            return None
 
     def detect_file_type(self, file_path):
         file_signatures = {
@@ -184,7 +173,8 @@ class GoogleKeepManager:
         return None
 
     def get_notes(self, note_id=None):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -263,7 +253,7 @@ class GoogleKeepManager:
             except Exception as e:
                 logging.error(f"Error downloading blob file: {e}")
                 continue
-            
+
             if os.path.isfile(file):
                 mime_type = self.detect_file_type(file)
                 extension = mimetypes.guess_extension(mime_type)
@@ -282,7 +272,8 @@ class GoogleKeepManager:
             print("Title cannot be empty.")
             return
 
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -330,7 +321,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def search_notes(self, query=None, func=None, labels=None, colors=None, pinned=None, archived=None, trashed=None):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -392,7 +384,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def delete_note(self, note_id):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -409,7 +402,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def restore_note(self, note_id):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -426,7 +420,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def archive_note(self, note_id):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -443,7 +438,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def unarchive_note(self, note_id):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -460,7 +456,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def pin_note(self, note_id):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -477,7 +474,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def unpin_note(self, note_id):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -494,7 +492,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def modify_note(self, note_id, title=None, text=None, color=None, labels=None, annotations=None, collaborators=None):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -524,7 +523,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def add_item(self, note_id, item_text):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -544,7 +544,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def modify_item(self, note_id, item_id, text=None, checked=None, unchecked=None):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -573,7 +574,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def delete_item(self, note_id, item_id):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -597,7 +599,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def get_label(self, name=None, labelid=None):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -646,7 +649,8 @@ class GoogleKeepManager:
                 print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_RESUME_SESSION}))
 
     def create_label(self, name):
-        master_token = self.get_master_token()
+        #master_token = self.get_master_token()
+        master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
             success = keep.resume(self.username, master_token)
@@ -679,12 +683,9 @@ def main():
     # Arguments spécifiques à chaque commande
     subparsers = parser.add_subparsers(title="Commands", dest="command", metavar="COMMAND")
 
-    # Commande "save_master_token"
-    parser_save_master_token = subparsers.add_parser("save_master_token", help="Save master token")
-    parser_save_master_token.add_argument("--password", required=True, help="Google account password")
-
     # Commande "get_master_token"
     parser_get_master_token = subparsers.add_parser("get_master_token", help="Get master token")
+    parser_get_master_token.add_argument("--password", required=True, help="Google account password")
 
     # Commande "get_notes"
     parser_get_notes = subparsers.add_parser("get_notes", help="Get notes")
@@ -770,21 +771,20 @@ def main():
     parser_add_label.add_argument("name", help="Name of the label to add")
 
     args = parser.parse_args()
-    
-    manager = GoogleKeepManager(args.username)
+
+    manager = GoogleKeepManager(args.username, args.token)
 
     # Vérifier si l'argument --username est fourni
     if not args.username:
         print(self.ERROR_MISSING_USERNAME)
         return
-        
+
     if args.token:
         manager.master_token = args.token
     # Exécuter la commande appropriée en fonction des arguments fournis
-    if args.command == "save_master_token":
-        manager.save_master_token(args.username, args.password)
-    elif args.command == "get_master_token":
-        manager.get_master_token(True)
+    if args.command == "get_master_token":
+        manager.get_master_token(args.username, args.password)
+        #manager.get_master_token(True)
     elif args.command == "get_notes":
         if hasattr(args, 'note_id') and args.note_id:
             manager.get_notes(args.note_id)
