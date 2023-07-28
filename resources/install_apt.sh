@@ -45,7 +45,7 @@ echo "Get version of installed packages"
 echo "*********************************"
 echo 90 > ${PROGRESS_FILE}
 $VENV_DIR/bin/python3 --version
-pip list
+$VENV_DIR/bin/pip list
 
 echo 100 > ${PROGRESS_FILE}
 echo $(date)
