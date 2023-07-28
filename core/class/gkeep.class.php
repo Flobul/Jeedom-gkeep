@@ -142,7 +142,7 @@ class gkeep extends eqLogic
         if (file_exists(jeedom::getTmpFolder(__CLASS__) . '/dependency')) {
             $return['state'] = 'in_progress';
         } else {
-            if (exec(system::getCmdSudo() . self::getPythonPath() . ' -m pip list | grep -Ewc "gkeepapi"') < 2) {
+            if (exec(system::getCmdSudo() . self::getPythonPath() . ' -m pip list | grep -Ewc "gkeepapi"') < 1) {
                 $return['state'] = 'nok';
             } else {
                 $return['state'] = 'ok';
@@ -1112,8 +1112,8 @@ class gkeepCmd extends cmd
             $calculatedHeight = intval($this->getEqlogic()->getDisplay('height', '400')) - 100;
             $calculatedWidth = intval($this->getEqlogic()->getDisplay('width', '350')) - 17;
             $_options = array(
-			    'height' => $calculatedHeight . 'px',
-			    'width' => $calculatedWidth . 'px',
+                'height' => $calculatedHeight . 'px',
+                'width' => $calculatedWidth . 'px',
                 'keepId' => $this->getConfiguration('id', '')
             );
         }
