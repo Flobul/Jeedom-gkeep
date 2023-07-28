@@ -142,7 +142,7 @@ class gkeep extends eqLogic
         if (file_exists(jeedom::getTmpFolder(__CLASS__) . '/dependency')) {
             $return['state'] = 'in_progress';
         } else {
-            if (exec(system::getCmdSudo() . self::getPythonPath() . ' -m pip list | grep -Ewc "keyring|gkeepapi"') < 2) {
+            if (exec(system::getCmdSudo() . self::getPythonPath() . ' -m pip list | grep -Ewc "gkeepapi"') < 2) {
                 $return['state'] = 'nok';
             } else {
                 $return['state'] = 'ok';
