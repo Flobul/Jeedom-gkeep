@@ -211,7 +211,9 @@ class gkeep extends eqLogic
         for ($i = 1; $i <= config::byKey('max_account_number', __CLASS__); $i++) {
             if ($_id && $_id != $i)  continue;
             $email = config::byKey('email', __CLASS__, '')[$i];
-
+            if (config::byKey('token', __CLASS__)[$i] == '') {
+                self::login($i);
+            }
             log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__));
             if ($email == '' || config::byKey('password', __CLASS__, '')[$i] == '') {
                 throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
@@ -275,6 +277,9 @@ class gkeep extends eqLogic
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__) . ' ' . $_id . ' & ' . $_account);
         for ($i = 1; $i <= config::byKey('max_account_number', __CLASS__); $i++) {
             $email = config::byKey('email', __CLASS__, '')[$i];
+            if (config::byKey('token', __CLASS__)[$i] == '') {
+                self::login($i);
+            }
             if ($_account && $_account != $email)  continue;
             if ($email == '') {
                 throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
