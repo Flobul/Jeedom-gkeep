@@ -198,7 +198,7 @@ class gkeep extends eqLogic
             $return[$i] = self::sendCmdAndFormatResult($cmd[$i]);
             if (isset($return[$i]['result'])) {
                 log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Jeton récupéré ', __FILE__). $return[$i]['result']['token']);
-                $token = array($i => $return[$i]['result']['token']) + config::byKey('token', __CLASS__);
+                $token = array($i => $return[$i]['result']['token']) + config::byKey('token', __CLASS__, array(1 => ''));
                 config::save('token', $token, __CLASS__);
             }
         }
@@ -211,7 +211,7 @@ class gkeep extends eqLogic
         for ($i = 1; $i <= config::byKey('max_account_number', __CLASS__); $i++) {
             if ($_id && $_id != $i)  continue;
             $email = config::byKey('email', __CLASS__, '')[$i];
-            if (config::byKey('token', __CLASS__)[$i] == '') {
+            if (config::byKey('token', __CLASS__, array(1 => ''))[$i] == '') {
                 self::login($i);
             }
             log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__));
@@ -224,7 +224,7 @@ class gkeep extends eqLogic
             $return[$i] = self::sendCmdAndFormatResult($cmd[$i]);
             if (isset($return[$i]['result'])) {
                 log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Jeton récupéré ', __FILE__). $return[$i]['result']['token']);
-                $token = array($i => $return[$i]['result']['token']) + config::byKey('token', __CLASS__);
+                $token = array($i => $return[$i]['result']['token']) + config::byKey('token', __CLASS__, array(1 => ''));
                 config::save('token', $token, __CLASS__);
             }
         }
@@ -277,7 +277,7 @@ class gkeep extends eqLogic
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__) . ' ' . $_id . ' & ' . $_account);
         for ($i = 1; $i <= config::byKey('max_account_number', __CLASS__); $i++) {
             $email = config::byKey('email', __CLASS__, '')[$i];
-            if (config::byKey('token', __CLASS__)[$i] == '') {
+            if (config::byKey('token', __CLASS__, array(1 => ''))[$i] == '') {
                 self::login($i);
             }
             if ($_account && $_account != $email)  continue;
@@ -285,7 +285,7 @@ class gkeep extends eqLogic
                 throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
             }
             $cmd = ' --username ' . $email;
-            $cmd .= ' --token "' . config::byKey('token', __CLASS__)[$i] . '"';
+            $cmd .= ' --token "' . config::byKey('token', __CLASS__, array(1 => ''))[$i] . '"';
             $cmd .= ' get_notes';
             $cmd .= ($_id?' --note_id "' . $_id . '"':'');
 
