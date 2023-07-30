@@ -34,7 +34,8 @@
       jeedom.cmd.addUpdateFunction('#id#',function(_options) {
         if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
           cmd.setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
-          cmd.querySelector('.stateText').empty().append(_options.display_value+' #unite#')
+          cmd.querySelector('.stateText').innerHTML = _options.display_value + ' #unite#';
+          //cmd.querySelector('.stateText').empty().append(_options.display_value+' #unite#')
           if (_options.alertLevel) {
             if (_options.alertLevel == 'warning') {
               cmd.addClass('label label-warning')
@@ -58,7 +59,7 @@
           document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').style.display = 'none';
         }
       });
-      
+
       document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').addEventListener('click', function(event) {
         console.log('click',document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML)
           if (document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML != '') {

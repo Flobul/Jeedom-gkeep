@@ -9,7 +9,7 @@
         <span class="hiddenAddItem">
             <span>
                 <input type="checkbox" class="checkBox">
-            </span> 
+            </span>
             <strong class="state" contenteditable="true"></strong>
             <span>
                 <a class="clickRemove" title="{{Annuler}}"><i class="fas fa-times"></i></a>
@@ -69,7 +69,8 @@
     <script>
       jeedom.cmd.addUpdateFunction('#id#',function(_options) {
         if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
-          cmd.querySelector('.state').empty().append(_options.display_value+' #unite#')
+          cmd.querySelector('.state').innerHTML = _options.display_value + ' #unite#';
+          //cmd.querySelector('.state').empty().append(_options.display_value+' #unite#')
           if ('#checked#' && '#checked#' != '#' + 'checked#') {
               cmd.querySelector('.checkBox').checked = true;
               cmd.querySelector('.state').style.textDecoration = 'line-through';
