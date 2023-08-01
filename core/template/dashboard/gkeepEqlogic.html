@@ -1,4 +1,4 @@
-<div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd #custom_layout# #eqLogic_class# #class# #category#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width: #width#;height: #height#;#style#;background-color: #bgEqLogic# !important;">
+<div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd #custom_layout# #eqLogic_class# #class# #category#" data-eqType="#eqType#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="#version#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" style="width: #width#;#style#;background-color: #bgEqLogic# !important;">
   <div class="widget-name" style="background-color: #bgWidgetName# !important;">
     <span style="color:#background-color#" title="#alert_name#">
       <i class='#alert_icon#'></i>
@@ -66,7 +66,7 @@
     }
     if ('#delete_id#' != '' && '#restore_id#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete')?.addEventListener('click', function() {
-        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').hasClass('isTrashed')) {
+        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').className.indexOf('isTrashed') !== -1) {
             document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').removeClass('isTrashed')
             jeedom.cmd.execute({ id: '#restore_id#' })
         } else {
@@ -86,7 +86,7 @@
     }
     if ('#pin_id#' != '' && '#unpin_id#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin')?.addEventListener('click', function() {
-        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').hasClass('isPinned')) {
+        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').className.indexOf('isPinned') !== -1) {
             document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').removeClass('isPinned')
             jeedom.cmd.execute({ id: '#unpin_id#' })
         } else {
@@ -99,7 +99,7 @@
     }
     if ('#archive_id#' != '' && '#unarchiveid#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive')?.addEventListener('click', function() {
-        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').hasClass('isArchived')) {
+        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').className.indexOf('isArchived') !== -1) {
             document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').removeClass('isArchived')
             jeedom.cmd.execute({ id: '#unarchiveid#' })
         } else {
