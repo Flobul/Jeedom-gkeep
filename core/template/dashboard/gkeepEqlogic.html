@@ -67,10 +67,10 @@
     if ('#delete_id#' != '' && '#restore_id#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete')?.addEventListener('click', function() {
         if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').className.indexOf('isTrashed') !== -1) {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').removeClass('isTrashed')
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').classList.remove('isTrashed');
             jeedom.cmd.execute({ id: '#restore_id#' })
         } else {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').addClass('isTrashed')
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').classList.add('isTrashed');
             jeedom.cmd.execute({ id: '#delete_id#' })
         }
       })
@@ -87,10 +87,10 @@
     if ('#pin_id#' != '' && '#unpin_id#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin')?.addEventListener('click', function() {
         if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').className.indexOf('isPinned') !== -1) {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').removeClass('isPinned')
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').classList.remove('isPinned');
             jeedom.cmd.execute({ id: '#unpin_id#' })
         } else {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').addClass('isPinned')
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionPin').classList.add('isPinned');
             jeedom.cmd.execute({ id: '#pin_id#' })
         }
       })
@@ -100,10 +100,10 @@
     if ('#archive_id#' != '' && '#unarchiveid#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive')?.addEventListener('click', function() {
         if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').className.indexOf('isArchived') !== -1) {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').removeClass('isArchived')
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').classList.remove('isArchived');
             jeedom.cmd.execute({ id: '#unarchiveid#' })
         } else {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').addClass('isArchived')
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').classList.add('isArchived');
             jeedom.cmd.execute({ id: '#archive_id#' })
         }
       })
