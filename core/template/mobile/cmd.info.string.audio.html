@@ -1,0 +1,49 @@
+<div class="cmd cmd-widget #history#" data-type="info" data-subtype="string" data-template="default" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-order="#order#" data-eqLogic_id="#eqLogic_id#" draggable=true>
+    <div class="content-xs textList">
+        <audio controls class="stateAudio">
+            <a>
+            </a>
+        </audio>
+    </div>
+    <style>
+      .cmd[data-cmd_uid="#uid#"] .stateAudio {
+          height: auto;
+          max-width: 200px;
+          overflow: auto;
+      }
+      .cmd[data-cmd_uid="#uid#"] .stateAudio:hover {
+        -ms-transform: scale(0.95); /* IE 9 */
+        -webkit-transform: scale(0.95); /* Safari 3-8 */
+        transform: scale(0.95);
+        transition: transform .3s;
+      }
+    </style>
+    <template></template>
+    <script>
+      jeedom.cmd.addUpdateFunction('#id#',function(_options) {
+        if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+          var audio = _options.display_value.substring(_options.display_value.indexOf("/plugins/gkeep/data/"));
+          cmd.setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
+          cmd.querySelector('.stateAudio').setAttribute('src', audio)
+          cmd.querySelector('.stateAudio a').setAttribute('href', audio)
+          if (_options.alertLevel) {
+            if (_options.alertLevel == 'warning') {
+              cmd.classList.add('label', 'label-warning');
+              cmd.setAttribute('data-alertlevel','warning')
+            } else if (_options.alertLevel == 'danger') {
+              cmd.classList.add('label', 'label-danger');
+              cmd.setAttribute('data-alertlevel','danger')
+            } else {
+              cmd.classList.remove('label', 'label-warning', 'label-danger');
+              cmd.setAttribute('data-alertlevel','none')
+            }
+          }
+        }
+      });
+      jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#'}])
+      if (domUtils.issetWidgetOptParam('#scale#', 'scale')) {
+        let stateAudio = document.querySelector('.cmd[data-cmd_uid="#uid#"] .stateAudio');
+        stateAudio.width = stateAudio.width * parseFloat('#scale#');
+      }
+    </script>
+</div>

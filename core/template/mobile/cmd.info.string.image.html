@@ -1,0 +1,58 @@
+<div class="cmd cmd-widget #history#" data-type="info" data-subtype="string" data-template="default" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#" data-order="#order#" data-eqLogic_id="#eqLogic_id#" draggable=true>
+    <div class="content-xs">
+        <img class="stateImage" >
+    </div>
+    <style>
+      .cmd[data-cmd_uid="#uid#"] .stateImage {
+          height: auto;
+          max-width: 200px;
+          overflow: auto;
+      }
+      .cmd[data-cmd_uid="#uid#"] .stateImage:hover {
+        -ms-transform: scale(0.95); /* IE 9 */
+        -webkit-transform: scale(0.95); /* Safari 3-8 */
+        transform: scale(0.95);
+        transition: transform .3s;
+      }
+      div.modal-content img.modal-image#id# {
+        max-width: 100%;
+        max-height: 80vh;
+      }
+    </style>
+    <template></template>
+    <script>
+      jeedom.cmd.addUpdateFunction('#id#',function(_options) {
+        if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+          cmd.setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
+          cmd.querySelector('.stateImage').setAttribute('src', _options.display_value.substring(_options.display_value.indexOf("/plugins/gkeep/data/")))
+          if (_options.alertLevel) {
+            if (_options.alertLevel == 'warning') {
+              cmd.classList.add('label', 'label-warning');
+              cmd.setAttribute('data-alertlevel','warning')
+            } else if (_options.alertLevel == 'danger') {
+              cmd.classList.add('label', 'label-danger');
+              cmd.setAttribute('data-alertlevel','danger')
+            } else {
+              cmd.classList.remove('label', 'label-warning', 'label-danger');
+              cmd.setAttribute('data-alertlevel','none')
+            }
+          }
+        }
+      });
+      jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#'}])
+      document.querySelector('.cmd[data-cmd_uid="#uid#"] .stateImage').addEventListener("click", function(){
+        var imageUrl = this.src;
+        var modalContent = `<div class="modal-content">
+                                <img src="${imageUrl}" class="img-fluid modal-image#id#">
+                              </div>`;
+        bootbox.dialog({
+          message: modalContent,
+          closeButton: true
+        });
+      });
+      if (domUtils.issetWidgetOptParam('#scale#', 'scale')) {
+        let stateImage = document.querySelector('.cmd[data-cmd_uid="#uid#"] .stateImage');
+        stateImage.width = stateImage.width * parseFloat('#scale#');
+      }
+    </script>
+</div>

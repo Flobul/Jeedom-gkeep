@@ -9,7 +9,7 @@
         <span class="hiddenAddItem">
             <span>
                 <input type="checkbox" class="checkBox">
-            </span> 
+            </span>
             <strong class="state" contenteditable="true"></strong>
             <span>
                 <a class="clickRemove" title="{{Annuler}}"><i class="fas fa-times"></i></a>
@@ -69,7 +69,8 @@
     <script>
       jeedom.cmd.addUpdateFunction('#id#',function(_options) {
         if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
-          cmd.querySelector('.state').empty().append(_options.display_value+' #unite#')
+          cmd.querySelector('.state').innerHTML = _options.display_value + ' #unite#';
+          //cmd.querySelector('.state').empty().append(_options.display_value+' #unite#')
           if ('#checked#' && '#checked#' != '#' + 'checked#') {
               cmd.querySelector('.checkBox').checked = true;
               cmd.querySelector('.state').style.textDecoration = 'line-through';
@@ -79,13 +80,13 @@
           }
           if (_options.alertLevel) {
             if (_options.alertLevel == 'warning') {
-              cmd.addClass('label label-warning')
+              cmd.classList.add('label', 'label-warning');
               cmd.setAttribute('data-alertlevel','warning')
             } else if (_options.alertLevel == 'danger') {
-              cmd.addClass('label label-danger')
+              cmd.classList.add('label', 'label-danger');
               cmd.setAttribute('data-alertlevel','danger')
             } else {
-              cmd.removeClass('label label-warning label-danger')
+              cmd.classList.remove('label', 'label-warning', 'label-danger');
               cmd.setAttribute('data-alertlevel','none')
             }
           }

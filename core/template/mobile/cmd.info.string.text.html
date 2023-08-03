@@ -14,13 +14,13 @@
           text-align:left;
       }
       .cmd[data-cmd_uid="#uid#"] .stateText {
-          height: auto;
-          max-height: #height#;
+          height: #height#;
           width: #width#;
           overflow: auto;
           word-break: normal !important;
           word-wrap: normal !important;
           white-space: pre !important;
+          resize: vertical;
       }
       .cmd[data-cmd_uid="#uid#"] .sendButton {
           display: none;
@@ -34,16 +34,17 @@
       jeedom.cmd.addUpdateFunction('#id#',function(_options) {
         if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
           cmd.setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
-          cmd.querySelector('.stateText').empty().append(_options.display_value+' #unite#')
+          cmd.querySelector('.stateText').innerHTML = _options.display_value + ' #unite#';
+          //cmd.querySelector('.stateText').empty().append(_options.display_value+' #unite#')
           if (_options.alertLevel) {
             if (_options.alertLevel == 'warning') {
-              cmd.addClass('label label-warning')
+              cmd.classList.add('label', 'label-warning');
               cmd.setAttribute('data-alertlevel','warning')
             } else if (_options.alertLevel == 'danger') {
-              cmd.addClass('label label-danger')
+              cmd.classList.add('label', 'label-danger');
               cmd.setAttribute('data-alertlevel','danger')
             } else {
-              cmd.removeClass('label label-warning label-danger')
+              cmd.classList.remove('label', 'label-warning', 'label-danger');
               cmd.setAttribute('data-alertlevel','none')
             }
           }
@@ -58,7 +59,7 @@
           document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').style.display = 'none';
         }
       });
-      
+
       document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').addEventListener('click', function(event) {
         console.log('click',document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML)
           if (document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML != '') {
