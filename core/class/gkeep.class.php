@@ -933,7 +933,7 @@ class gkeep extends eqLogic
 		if (!is_array($replace)) {
 			return $replace;
 		}
-        $replace['#height#'] = '500px';
+        //$replace['#height#'] = '500px';
 
         $replace['#pin_id#'] = ($pin_cmd = $this->getCmd('action', 'pinNote')) && $pin_cmd->getIsVisible() == 1 ? $pin_cmd->getId() : '';
         $replace['#unpin_id#'] = ($unpin_cmd = $this->getCmd('action', 'unpinNote')) && $unpin_cmd->getIsVisible() == 1 ? $unpin_cmd->getId() : '';
@@ -1114,11 +1114,11 @@ class gkeepCmd extends cmd
                 'order' => $this->getConfiguration('sort', '')
             );
         } else {
-            $calculatedHeight = intval($this->getEqlogic()->getDisplay('height', '400')) - 100;
+            $calculatedHeight = intval($this->getEqlogic()->getDisplay('height', '400')) - 50;
             $calculatedWidth = intval($this->getEqlogic()->getDisplay('width', '350')) - 17;
             $_options = array(
-                'height' => $calculatedHeight . 'px',
-                'width' => $calculatedWidth . 'px',
+			    'height' => $calculatedHeight . 'px',
+			    'width' => $calculatedWidth . 'px',
                 'keepId' => $this->getConfiguration('id', '')
             );
         }
