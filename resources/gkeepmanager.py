@@ -429,7 +429,7 @@ class GoogleKeepManager:
             if success:
                 gnote = keep.get(note_id)
                 if gnote:
-                    gnote.archive()
+                    gnote.archived = True
                     keep.sync()
                     print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_ARCHIVED}))
                 else:
@@ -447,7 +447,7 @@ class GoogleKeepManager:
             if success:
                 gnote = keep.get(note_id)
                 if gnote:
-                    gnote.unarchive()
+                    gnote.archived = False
                     keep.sync()
                     print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_NOTE_UNARCHIVED}))
                 else:
