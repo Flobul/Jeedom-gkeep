@@ -28,7 +28,7 @@ class gkeep extends eqLogic
      *
      * @var string
      */
-    public static $_pluginVersion = '0.97';
+    public static $_pluginVersion = '0.98';
 
     /**
      * Tableau des templates.
@@ -812,11 +812,14 @@ class gkeep extends eqLogic
             case 'archiveNote':
                 $_action = 'archive_note';
                 break;
+            case 'unarchiveNote':
+                $_action = 'unarchive_note';
+                break;
+            case 'deleteNote':
+                $_action = 'delete_note';
+                break;
             case 'restoreNote':
                 $_action = 'restore_note';
-                break;
-            case 'deleteNode':
-                $_action = 'delete_note';
                 break;
             default:
                 log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Commande inexistante ', __FILE__) . $_action);
