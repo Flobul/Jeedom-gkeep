@@ -193,7 +193,8 @@ class gkeep extends eqLogic
             }
             $cmd[$i] = ' --username ' . $email;
             $cmd[$i] .= ' get_master_token';
-            $cmd[$i] .= ' --password ' . config::byKey('password', __CLASS__)[$i];
+            $cmd[$i] .= ' --password "' . config::byKey('password', __CLASS__)[$i];
+            $cmd[$i] .= '"';
 
             $return[$i] = self::sendCmdAndFormatResult($cmd[$i]);
             if (isset($return[$i]['result'])) {
