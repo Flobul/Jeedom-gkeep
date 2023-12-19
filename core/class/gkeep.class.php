@@ -28,7 +28,7 @@ class gkeep extends eqLogic
      *
      * @var string
      */
-    public static $_pluginVersion = '0.98';
+    public static $_pluginVersion = '0.99';
 
     /**
      * Tableau des templates.
@@ -394,7 +394,7 @@ class gkeep extends eqLogic
             'GRAY' => '#e8e9ec',
             'CERULEAN' => '#b3caf5',
             'TEAL' => '#bafceb',
-            'DEFAULT' => '#fefefe'
+            'DEFAULT' => '#00000000'
         );
 
         return isset($colorMap[$_color]) ? $colorMap[$_color] : $_color;

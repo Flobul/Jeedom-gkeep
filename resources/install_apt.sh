@@ -36,6 +36,8 @@ echo "*************************************"
 $VENV_DIR/bin/python3 -m pip install --upgrade pip wheel
 echo 60 > ${PROGRESS_FILE}
 $VENV_DIR/bin/python3 -m pip install "urllib3<2"
+echo 70 > ${PROGRESS_FILE}
+$VENV_DIR/bin/python3 -m pip install "gpsoauth<1.0.3"
 echo 80 > ${PROGRESS_FILE}
 $VENV_DIR/bin/python3 -m pip install gkeepapi
 
