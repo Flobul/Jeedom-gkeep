@@ -24,4 +24,3 @@ foreach ($gkeep_widgets as $widget) {
 echo '</div>';
 echo '</div>';
 ?>
-<?php include_file('desktop', 'panel', 'js', 'gkeep'); ?>

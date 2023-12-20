@@ -1121,7 +1121,6 @@ class gkeepCmd extends cmd
             $calculatedHeight = intval($this->getEqlogic()->getDisplay('height', '400')) - 50;
             $calculatedWidth = intval($this->getEqlogic()->getDisplay('width', '350')) - 17;
             $_options = array(
-			    'height' => $calculatedHeight . 'px',
 			    'width' => $calculatedWidth . 'px',
                 'keepId' => $this->getConfiguration('id', '')
             );
