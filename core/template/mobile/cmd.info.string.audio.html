@@ -6,6 +6,9 @@
         </audio>
     </div>
     <style>
+      .cmd[data-cmd_uid="#uid#"] .textList {
+          height: auto;
+      }
       .cmd[data-cmd_uid="#uid#"] .stateAudio {
           height: auto;
           max-width: 200px;
@@ -41,7 +44,7 @@
         }
       });
       jeedom.cmd.refreshValue([{cmd_id :'#id#',display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#'}])
-      if (domUtils.issetWidgetOptParam('#scale#', 'scale')) {
+      if ('#scale#' != '#' + 'scale#') {
         let stateAudio = document.querySelector('.cmd[data-cmd_uid="#uid#"] .stateAudio');
         stateAudio.width = stateAudio.width * parseFloat('#scale#');
       }

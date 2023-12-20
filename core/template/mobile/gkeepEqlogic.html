@@ -3,21 +3,19 @@
     <span style="color:#background-color#" title="#alert_name#">
       <i class='#alert_icon#'></i>
     </span>
-    <span class="cmd actionDelete pull-left cursor #trashed#" data-cmd_id="#delete_id#">
+    <span class="cmd actionDelete pull-left cursor #trashed#" data-cmd_id="#delete_id#" title="Supprimer la note/liste">
       <i class="fas fa-trash"></i>
     </span>
-    <span class="cmd refresh pull-right cursor" data-cmd_id="#refresh_id#">
+    <span class="cmd refresh pull-right cursor" data-cmd_id="#refresh_id#" title="Rafraîchir la note/liste">
       <i class="fas fa-sync"></i>
     </span>
-    <span class="panelLink pull-left cursor">
-      <a href="#panelLink#"><i class="fas fa-external-link-alt"></i></a>
-    </span>
+
     <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
     <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
     <span class="cmd actionPin pull-right cursor #pinned#" data-cmd_id="#pin_id#">
       <i class="fas fa-map-pin"></i>
     </span>
-    <span class="cmd actionArchive pull-right cursor #archived#" data-cmd_id="#archive_id#">
+    <span class="cmd actionArchive pull-right cursor #archived#" data-cmd_id="#archive_id#" title="Archiver la note/liste">
       <i class="fas fa-archive"></i>
     </span>
   </div>
@@ -66,16 +64,16 @@
     }
     if ('#delete_id#' != '' && '#restore_id#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete')?.addEventListener('click', function() {
-        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').className.indexOf('isTrashed') !== -1) {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').classList.remove('isTrashed');
+        if (document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete').className.indexOf('isTrashed') !== -1) {
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete').classList.remove('isTrashed');
             jeedom.cmd.execute({ id: '#restore_id#' })
         } else {
-            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive').classList.add('isTrashed');
+            document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete').classList.add('isTrashed');
             jeedom.cmd.execute({ id: '#delete_id#' })
         }
       })
     } else {
-      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionArchive')?.remove()
+      document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .actionDelete')?.remove()
     }
     if ('#refresh_id#' != '') {
       document.querySelector('.eqLogic[data-eqLogic_uid="#uid#"] .refresh')?.addEventListener('click', function() {
