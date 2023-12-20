@@ -246,7 +246,8 @@ class GoogleKeepManager:
         result = []
         for idx, blob in enumerate(blobs):
             url = keep.getMediaLink(blob)
-            file_name = f"{note.id}_{int(time.time())}"
+            #file_name = f"{note.id}_{int(time.time())}"
+            file_name = f"{note.id}_{int(note.timestamps.edited.timestamp())}"
             file = os.path.join(self.path, file_name)
             try:
                 urllib.request.urlretrieve(url, file)
