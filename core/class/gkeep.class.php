@@ -28,7 +28,7 @@ class gkeep extends eqLogic
      *
      * @var string
      */
-    public static $_pluginVersion = '0.99';
+    public static $_pluginVersion = '1.00';
 
     /**
      * Tableau des templates.
