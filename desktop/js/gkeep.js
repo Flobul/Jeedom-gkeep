@@ -14,14 +14,10 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-$("#table_cmd").sortable({
-  axis: "y",
-  cursor: "move",
-  items: ".cmd",
-  placeholder: "ui-state-highlight",
-  tolerance: "intersect",
-  forcePlaceholderSize: true
-});
+const commandTableBody = document.querySelector('#table_cmd tbody');
+if (commandTableBody && typeof Sortable !== 'undefined') {
+  new Sortable(commandTableBody, {draggable: '.cmd', handle: '.cmd', animation: 150});
+}
 
 function addCmdToTable(_cmd) {
   if (!isset(_cmd)) {
@@ -88,34 +84,33 @@ function addCmdToTable(_cmd) {
   tr += '<a class="btn btn-danger btn-xs cmdAction roundedRight" data-action="remove" title="{{Suppression de la commande}} ' + _cmd.type + '"><i class="fas fa-minus-circle"></i></a>';
   tr += '</tr>';
 
-  $('#table_cmd tbody').append(tr);
-  var tr = $('#table_cmd tbody tr').last();
+  commandTableBody.insertAdjacentHTML('beforeend', tr);
+  var newRow = commandTableBody.lastElementChild;
   jeedom.eqLogic.buildSelectCmd({
-    id: $('.eqLogicAttr[data-l1key=id]').value(),
+    id: document.querySelector('.eqLogicAttr[data-l1key="id"]').jeeValue(),
     filter: {
       type: 'info'
     },
     error: function(error) {
-      $.fn.showAlert({
+      jeedomUtils.showAlert({
         message: error.message,
         level: 'danger'
       });
     },
     success: function(result) {
-      tr.find('.cmdAttr[data-l1key=value]').append(result);
-      tr.find('.cmdAttr[data-l1key=configuration][data-l2key=updateCmdId]').append(result);
-      tr.setValues(_cmd, '.cmdAttr');
-      jeedom.cmd.changeType(tr, init(_cmd.subType));
+      newRow.querySelector('.cmdAttr[data-l1key="value"]')?.insertAdjacentHTML('beforeend', result);
+      newRow.querySelector('.cmdAttr[data-l1key="configuration"][data-l2key="updateCmdId"]')?.insertAdjacentHTML('beforeend', result);
+      newRow.setJeeValues(_cmd, '.cmdAttr');
+      jeedom.cmd.changeType(newRow, init(_cmd.subType));
     }
   });
 }
 
-$(document).ready(function() {
-  jeedom.config.load({
+jeedom.config.load({
     plugin : 'gkeep',
     configuration: 'selected_account',
     error: function (error) {
-      $.fn.showAlert({message: error.message, level: 'danger'});
+      jeedomUtils.showAlert({message: error.message, level: 'danger'});
     },
     success: function (data) {
       for (var i = 0; i < data.length; i++) {
@@ -128,38 +123,44 @@ $(document).ready(function() {
     type: 'gkeep',
     noCache: true,
     error: function (error) {
-      $.fn.showAlert({message: error.message, level: 'warning'});
+      jeedomUtils.showAlert({message: error.message, level: 'warning'});
     },
     success: function(_eqLogics) {
       for (var i in _eqLogics) {
-        updateDisplayCard($('.eqLogicDisplayCard[data-eqlogic_id=' + _eqLogics[i].id + ']'), _eqLogics[i]);
+        updateDisplayCard(document.querySelector('.eqLogicDisplayCard[data-eqlogic_id="' + _eqLogics[i].id + '"]'), _eqLogics[i]);
       }
     }
   });
 
-});
-
-hideDisplayCard = function (_account, _state) {
-  var cards = $('.eqLogicDisplayCard[data-account="'+ _account +'"]');
-  cards.toggle(_state != "0" && _state != 0); 
+function hideDisplayCard(_account, _state) {
+  document.querySelectorAll('.eqLogicDisplayCard[data-account="' + CSS.escape(String(_account)) + '"]').forEach(card => {
+    card.style.display = _state != '0' && _state != 0 ? '' : 'none';
+  });
 }
 
-updateLogoSelectGkeep = function (_val, _state) {
-    console.log(_val, _state )
-    var div = $('.eqLogicThumbnailContainer .logoSelectGkeep[data-value="'+ _val +'"]');
-    div.attr('data-state', _state);
-    div.find('i').addClass(parseInt(_state) != 1 ? 'fa-user-alt-slash' : 'fa-user').removeClass(parseInt(_state) != 1 ? 'fa-user' : 'fa-user-alt-slash');
-    div.css('opacity', parseInt(_state) != 1 ? 0.5 : 1);
-};
-updateDisplayCard = function (_card, _eq) {
+function updateLogoSelectGkeep(_val, _state) {
+    const selector = '.eqLogicThumbnailContainer .logoSelectGkeep[data-value="' + CSS.escape(String(_val)) + '"]';
+    document.querySelectorAll(selector).forEach(element => {
+      element.dataset.state = _state;
+      const icon = element.querySelector('i');
+      if (icon) {
+        icon.classList.toggle('fa-user', parseInt(_state) === 1);
+        icon.classList.toggle('fa-user-alt-slash', parseInt(_state) !== 1);
+      }
+      element.style.opacity = parseInt(_state) === 1 ? '1' : '0.5';
+    });
+}
+function updateDisplayCard(_card, _eq) {
+	if (!_card) return;
 	// Set visibility
-    _card.toggleClass('disableCard', _eq.isEnable !== '1');
+    _card.classList.toggle('disableCard', _eq.isEnable !== '1');
     var asTable = '';
   	asTable += asTableHelper(_eq, 'visible', 'fas fa-eye', 'fas fa-eye-slash');
 	asTable += asTableHelper(_eq, 'pinned', 'fas fa-map-pin', 'fas fa-map-pin');
 	asTable += asTableHelper(_eq, 'archived', 'fas fa-archive', 'fas fa-archive');
 	asTable += asTableHelper(_eq, 'trashed', 'fas fa-trash', 'fas fa-trash');
-	_card.find('span.hiddenAsTable').empty().html(asTable);
+	const tableStatus = _card.querySelector('span.hiddenAsTable');
+	if (tableStatus) tableStatus.innerHTML = asTable;
 
 	var asCard = '';
 	asCard += asCardHelper(_eq, 'enable', '{{Activé}}', '{{Désactivé}}', 'roundedLeft fas fa-check', 'roundedLeft fas fa-times');
@@ -168,10 +169,11 @@ updateDisplayCard = function (_card, _eq) {
 	asCard += asCardHelper(_eq, 'archived', '{{Archivé}}', '{{Non archivé}}', 'fas fa-archive',  'fas fa-archive');
 	asCard += asCardHelper(_eq, 'trashed', '{{Supprimé}}', '{{En cours}}', 'fas fa-trash', 'fas fa-trash');
 	asCard += '<a class="btn btn-xs cursor roundedRight"><i class="fas fa-cogs eqLogicAction tooltips" title="{{Configuration avancée}}" data-action="confEq"></i></a>';
-	_card.find('span.hiddenAsCard').empty().html(asCard);
+	const cardStatus = _card.querySelector('span.hiddenAsCard');
+	if (cardStatus) cardStatus.innerHTML = asCard;
 
-	_card.find('.eqLogicAction[data-action=confEq]').off('click').on('click', function() {
-		$('#md_modal').dialog().load('index.php?v=d&modal=eqLogic.configure&eqLogic_id=' + _eq.id).dialog('open');
+	_card.querySelector('.eqLogicAction[data-action="confEq"]')?.addEventListener('click', function() {
+		jeeDialog.dialog({id: 'md_modal', title: '{{Configuration avancée}}', contentUrl: 'index.php?v=d&modal=eqLogic.configure&eqLogic_id=' + _eq.id});
 	});
 }
 
@@ -244,19 +246,16 @@ asCardHelper = function(_eq, _item, _name, _unname, aClass, unaClass) {
     return '<a class="btn btn-xs cursor w30"><i class="' + iClass + colored + ' tooltips" title="' + name + '"></i></a>';
 }
 
-$('#bt_healthgkeep').on('click', function() {
-  $('#md_modal').dialog({
-    title: "{{Santé Google Keep}}"
-  });
-  $('#md_modal').load('index.php?v=d&plugin=gkeep&modal=health').dialog('open');
+document.getElementById('bt_healthgkeep')?.addEventListener('click', function() {
+  jeeDialog.dialog({id: 'md_modal', title: '{{Santé Google Keep}}', contentUrl: 'index.php?v=d&plugin=gkeep&modal=health'});
 });
 
-$('#bt_documentationgkeep').off('click').on('click', function() {
-  window.open($(this).attr("data-location"), "_blank", null);
+document.getElementById('bt_documentationgkeep')?.addEventListener('click', function() {
+  window.open(this.dataset.location, '_blank', 'noopener');
 });
 
-printEqLogic = function(_eqLogic) {
-  $.ajax({
+function printEqLogic(_eqLogic) {
+  domUtils.ajax({
     type: "POST",
     url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
     data: {
@@ -269,39 +268,39 @@ printEqLogic = function(_eqLogic) {
     },
     success: function(data) {
       if (data.state != 'ok') {
-        $.fn.showAlert({
+        jeedomUtils.showAlert({
           message: data.result,
           level: 'danger'
         });
         return;
       }
       if (data.result != '') {
-        $('#img_device').attr("src", data.result.img);
-        $('#img_device').addClass("imgColorFilter_" + data.result.color);
+        const image = document.getElementById('img_device');
+        if (image) {
+          image.src = data.result.img;
+          image.classList.add('imgColorFilter_' + data.result.color);
+        }
       }
     }
   })
-  $('#table_infoseqlogic .eqLogicAttr').removeClass('eqLogicAttr');
+  document.querySelectorAll('#table_infoseqlogic .eqLogicAttr').forEach(element => element.classList.remove('eqLogicAttr'));
 }
 
-$('#bt_addgkeep').on('click', function() {
-  $('#md_modal').dialog({
-    title: "{{Ajouter une note Google Keep}}"
-  });
-  $('#md_modal').load('index.php?v=d&plugin=gkeep&modal=addNote').dialog('open');
+document.getElementById('bt_addgkeep')?.addEventListener('click', function() {
+  jeeDialog.dialog({id: 'md_modal', title: '{{Ajouter une note Google Keep}}', contentUrl: 'index.php?v=d&plugin=gkeep&modal=addNote'});
 });
 
-$('#bt_synchronizegkeep').on('click', function() {
+document.getElementById('bt_synchronizegkeep')?.addEventListener('click', function() {
   synchronize();
 });
 
-synchronize = function() {
-  $.fn.showAlert({
+function synchronize() {
+  jeedomUtils.showAlert({
     message: '{{Synchronisation en cours}}',
     level: 'warning'
   });
-  $('#bt_synchronizegkeep > i.fas').addClass('fa-spin');
-  $.ajax({
+  document.querySelector('#bt_synchronizegkeep > i.fas')?.classList.add('fa-spin');
+  domUtils.ajax({
     type: "POST",
     url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
     data: {
@@ -309,36 +308,34 @@ synchronize = function() {
     },
     dataType: 'json',
     error: function(request, status, error) {
-      console.log(request, status, error)
       handleAjaxError(request, status, error);
     },
     success: function(data) {
-      console.log(data)
       if (data.state != 'ok') {
-        $.fn.showAlert({
+        jeedomUtils.showAlert({
           message: data.result,
           level: 'danger'
         });
         //return;
       } else {
-        $.fn.showAlert({
+        jeedomUtils.showAlert({
           message: '{{Synchronisation terminée}}',
           level: 'success'
         });
-        $('#bt_synchronizeSmartthings > i.fas').removeClass('fa-spin');
+        document.querySelector('#bt_synchronizegkeep > i.fas')?.classList.remove('fa-spin');
         window.location.reload();
       }
     }
   });
 }
 
-$('.eqLogicAction[data-action=delete]').on('click', function(e) {
+document.querySelectorAll('.eqLogicAction[data-action="delete"]').forEach(button => button.addEventListener('click', function(e) {
 
   var what = e.currentTarget.dataset.action2;
   var text = '{{Cette action supprimera tous les appareils.}}';
-  bootbox.confirm(text, function(result) {
+  jeeDialog.confirm(text, function(result) {
     if (result) {
-      $.ajax({
+      domUtils.ajax({
         type: "POST",
         url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
         data: {
@@ -351,13 +348,13 @@ $('.eqLogicAction[data-action=delete]').on('click', function(e) {
         },
         success: function(data) {
           if (data.state != 'ok') {
-            $.fn.showAlert({
+            jeedomUtils.showAlert({
               message: data.result,
               level: 'danger'
             });
             return;
           }
-          $.fn.showAlert({
+          jeedomUtils.showAlert({
             message: '{{Suppression réussie}} : ' + what,
             level: 'success'
           });
@@ -366,30 +363,27 @@ $('.eqLogicAction[data-action=delete]').on('click', function(e) {
       });
     }
   });
-});
+}));
 
-$('.logoSelectGkeep').on('click', function () {
-    var el = $(this);
-    var value = el.attr('data-value');
-    var state = el.attr('data-state');
+document.querySelectorAll('.logoSelectGkeep').forEach(element => element.addEventListener('click', function () {
+    var value = this.dataset.value;
+    var state = this.dataset.state;
     var newState = 1 - state;
     this.setAttribute('data-state', newState);
 
     var configuration = [];
-    $('.logoSelectGkeep').each(function (index) {
-        var value = $(this).attr('data-value');
-        var state = $(this).attr('data-state');
-        configuration.push({ value: value, state: state });
+    document.querySelectorAll('.logoSelectGkeep').forEach(item => {
+        configuration.push({value: item.dataset.value, state: item.dataset.state});
     });
     jeedom.config.save({
         plugin: 'gkeep',
         configuration: {selected_account: configuration},
         error: function (error) {
-            $.fn.showAlert({ message: error.message, level: 'danger' });
+            jeedomUtils.showAlert({ message: error.message, level: 'danger' });
         },
         success: function (data) {
             updateLogoSelectGkeep(value, newState);
             hideDisplayCard(value, newState);
 		}
 	});
-});
+}));

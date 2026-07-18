@@ -18,7 +18,7 @@
 
    require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
    include_file('core', 'authentification', 'php');
-   if (!isConnect()) {
+   if (!isConnect('admin')) {
        include_file('desktop', '404', 'php');
        die();
    }
@@ -27,7 +27,7 @@
    $token = config::byKey('token', 'gkeep');
    ?>
 
-<form class="form-horizontal">
+<form class="form-horizontal" id="configuration_plugin_gkeep">
    <fieldset>
       <legend>
          <i class="fa fa-list-alt"></i> {{Général}}
@@ -146,7 +146,7 @@
                   <sup><i class="fas fa-question-circle" title="{{Jeton d'accès généré}}"></i></sup>
               </label>
               <div class="col-sm-6">
-                <input type="text" text-editable="false" class="configKey form-control disabled" data-l1key="token" data-l2key="<?php echo $i ?>" placeholder="Jeton">
+                <input type="password" readonly class="configKey form-control" data-l1key="token" data-l2key="<?php echo $i ?>" placeholder="{{Jeton enregistré}}">
               </div>
             </div>
           <?php } ?>

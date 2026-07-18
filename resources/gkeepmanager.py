@@ -50,9 +50,9 @@ class GoogleKeepManager:
     ERROR_MISSING_USERNAME = "Error: Username is required."
 
     def __init__(self, username, token):
-        self.path = '/var/www/html/plugins/gkeep/data'
-        if not os.path.exists(self.path):
-            os.mkdir(self.path)
+        plugin_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.path = os.path.join(plugin_dir, 'data')
+        os.makedirs(self.path, exist_ok=True)
         self.username = username
         self.token = token
 

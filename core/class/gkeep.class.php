@@ -74,6 +74,12 @@ class gkeep extends eqLogic
      * *************************Méthodes statiques******************************
      */
 
+     public static function backupExclude()
+     	{
+       		// retourne le répertoire des datas à ne pas enregistrer dans le backup Jeedom
+       		return ['data'];
+     	}
+
     /**
      * Méthode appellée par le core (moteur de tâche) cron configuré dans la fonction gkeep_install
      * Lance une fonction pour récupérer les appareils et une fonction pour rafraichir les commandes

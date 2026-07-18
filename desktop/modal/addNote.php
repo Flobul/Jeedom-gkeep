@@ -185,17 +185,17 @@ $emails = config::byKey('email', 'gkeep');
         _target.setAttribute('data-touched', 1);
       }
       if (_target = event.target.closest('#sendIt')) {
-        var note = $('#table_createNoteGkeep').getValues('.addNoteAttr')[0];
+        var note = document.getElementById('table_createNoteGkeep').getJeeValues('.addNoteAttr')[0];
         var filteredNote = {};
 
         if (!note.title) {
-          $.fn.showAlert({
+          jeedomUtils.showAlert({
             message: '{{Veuillez remplir le titre avant de créer la note.}}',
             level: 'danger'
           });
         } else if (document.getElementById('createNote').getAttribute('data-action') == '1') {
           if (!note.text) {
-            $.fn.showAlert({
+            jeedomUtils.showAlert({
               message: '{{Veuillez remplir le texte avant de créer la note.}}',
               level: 'danger'
             });
@@ -216,7 +216,7 @@ $emails = config::byKey('email', 'gkeep');
           }
         });
         console.log(filteredNote)
-        $.ajax({
+        domUtils.ajax({
           type: "POST",
           url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
           data: {
@@ -231,7 +231,7 @@ $emails = config::byKey('email', 'gkeep');
           success: function(data) {
             console.log(data)
             if (data.state != 'ok') {
-              $.fn.showAlert({
+              jeedomUtils.showAlert({
                 message: data.result,
                 level: 'danger'
               });
