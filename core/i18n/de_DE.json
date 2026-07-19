@@ -11,31 +11,29 @@
         "Action sur ": "Aktion auf",
         "Ajouter un item": "Item hinzufügen",
         "Archiver la note": "Notiz archivieren",
-        "Commande envoyée : ": "Bestellung gesendet :",
+        "Argument GKeep invalide": "Ungültiges GKeep-Argument",
         "Commande inexistante ": "Befehl nicht vorhanden",
         "Désarchiver la note": "Notiz entarchivieren",
         "Désépingler la note": "Note entzerren",
         "Erreur : ": "Fehler :",
-        "Erreur lors de l\\'exécution de la commande : ": "Fehler bei der Ausführung des Befehls :",
+        "Erreur GKeep : ": "GKeep-Fehler: ",
         "Expression cron non valide : ": "Ungültiger Cron-Ausdruck :",
+        "Exécution de la commande GKeep": "Ausführung des Befehls GKeep",
         "Fichier ": "Datei",
         "ID vide, pas d\\'équipement créé : ": "Leere ID, keine Geräte erstellt:",
-        "Jeton récupéré ": "Wiederhergestelltes Token",
         "L\\'équipement ": "Ausrüstung",
+        "La commande GKeep a retourné le code ": "Der Befehl GKeep hat den Code zurückgegeben ",
         "Le message et le sujet ne peuvent pas être vide": "Nachricht und Betreff dürfen nicht leer sein",
         "Rafraîchir": "Aktualisieren",
         "Restaurer la note": "Note wiederherstellen",
+        "Réponse GKeep invalide": "Ungültige GKeep-Antwort",
         "Résultat $_layout ": "Ergebnis $_layout",
-        "Résultat array ": "Array-Ergebnis",
-        "Résultat brut ": "Bruttoergebnis",
-        "Résultat code ": "Ergebnis Code",
         "Sans titre": "Ohne Titel",
         "Suppression de la note ": "Löschen der Notiz",
         "Supprimer la note": "Notiz löschen",
         "Supprimer un item": "Ein Item löschen",
         "Texte": "Text",
         "Valeur à envoyer ": "Zu sendender Wert",
-        "Valeur à envoyer addItem ": "Zu sendender Wert addItem",
         "Veuillez renseignez un identifiant et un mot de passe de connexion.": "Bitte geben Sie einen Benutzernamen und ein Passwort für die Anmeldung ein.",
         "début": "anfang",
         "début ": "anfang",
@@ -60,9 +58,63 @@
         "Équipement visible": "Sichtbare Ausstattung",
         "État": "Status"
     },
+    "plugins\/gkeep\/core\/template\/dashboard\/cmd.action.message.additem.html": {
+        "Ajouter l'item": "Artikel hinzufügen",
+        "Annuler": "Abbrechen",
+        "Élément de liste": "Listenelement"
+    },
+    "plugins\/gkeep\/core\/template\/dashboard\/cmd.info.string.audio.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
+    "plugins\/gkeep\/core\/template\/dashboard\/cmd.info.string.image.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
+    "plugins\/gkeep\/core\/template\/dashboard\/cmd.info.string.list.html": {
+        "Annuler": "Abbrechen",
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
+    "plugins\/gkeep\/core\/template\/dashboard\/cmd.info.string.text.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung",
+        "Modifier": "Bearbeiten"
+    },
+    "plugins\/gkeep\/core\/template\/dashboard\/cmd.info.string.video.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
+    "plugins\/gkeep\/core\/template\/mobile\/cmd.action.message.additem.html": {
+        "Ajouter l'item": "Artikel hinzufügen",
+        "Annuler": "Abbrechen",
+        "Élément de liste": "Listenelement"
+    },
+    "plugins\/gkeep\/core\/template\/mobile\/cmd.info.string.audio.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
+    "plugins\/gkeep\/core\/template\/mobile\/cmd.info.string.image.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
+    "plugins\/gkeep\/core\/template\/mobile\/cmd.info.string.list.html": {
+        "Annuler": "Abbrechen",
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
+    "plugins\/gkeep\/core\/template\/mobile\/cmd.info.string.text.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung",
+        "Modifier": "Bearbeiten"
+    },
+    "plugins\/gkeep\/core\/template\/mobile\/cmd.info.string.video.html": {
+        "Date de collecte": "Datum der Abholung",
+        "Date de valeur": "Datum der Wertstellung"
+    },
     "plugins\/gkeep\/desktop\/js\/configuration.js": {
         "Authentification réussie.": "Authentifizierung erfolgreich.",
-        "Sauvegarde de la configuration des logs dev effectuée": "Sicherung der Konfiguration der Dev-Logs durchgeführt"
+        "Donner mon avis": "Meine Meinung abgeben"
     },
     "plugins\/gkeep\/desktop\/js\/gkeep.js": {
         "Activé": "Aktiv",
@@ -220,6 +272,7 @@
         "Jamais": "Niemals",
         "Jeton d'accès": "Zugangs-Token",
         "Jeton d'accès généré": "Generiertes Zugriffstoken",
+        "Jeton enregistré": "Token gespeichert",
         "Les dernières discussions autour du plugin": "Die neuesten Diskussionen rund um das Plugin",
         "Mot de passe": "Passwort",
         "Nombre de comptes": "Anzahl der Konten",
