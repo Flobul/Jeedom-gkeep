@@ -63,7 +63,6 @@
       });
 
       document.querySelector('.cmd[data-cmd_uid=#uid#] .sendButton').addEventListener('click', function(event) {
-        console.log('click',document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML)
           if (document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML != '') {
               updateNote#id#({text: document.querySelector('.cmd[data-cmd_uid=#uid#] .stateText').innerHTML});
           }

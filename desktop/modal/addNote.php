@@ -215,7 +215,6 @@ $emails = config::byKey('email', 'gkeep');
             filteredNote[key] = note[key];
           }
         });
-        console.log(filteredNote)
         domUtils.ajax({
           type: "POST",
           url: "plugins/gkeep/core/ajax/gkeep.ajax.php",
@@ -229,7 +228,6 @@ $emails = config::byKey('email', 'gkeep');
             handleAjaxError(request, status, error);
           },
           success: function(data) {
-            console.log(data)
             if (data.state != 'ok') {
               jeedomUtils.showAlert({
                 message: data.result,

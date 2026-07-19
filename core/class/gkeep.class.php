@@ -197,14 +197,14 @@ class gkeep extends eqLogic
             if ($email == '' || config::byKey('password', __CLASS__, '')[$i] == '') {
                 throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
             }
-            $cmd[$i] = ' --username ' . $email;
-            $cmd[$i] .= ' get_master_token';
-            $cmd[$i] .= ' --password "' . config::byKey('password', __CLASS__)[$i];
-            $cmd[$i] .= '"';
+            $cmd[$i] = array(
+                '--username', (string) $email,
+                'get_master_token',
+                '--password', (string) config::byKey('password', __CLASS__)[$i]
+            );
 
             $return[$i] = self::sendCmdAndFormatResult($cmd[$i]);
             if (isset($return[$i]['result'])) {
-                log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Jeton récupéré ', __FILE__). $return[$i]['result']['token']);
                 $token = array($i => $return[$i]['result']['token']) + config::byKey('token', __CLASS__, array(1 => ''));
                 config::save('token', $token, __CLASS__);
             }
@@ -214,26 +214,15 @@ class gkeep extends eqLogic
 
     public static function getMasterToken($_id = null)
     {
-        $cmd = array();
+        $return = array();
         for ($i = 1; $i <= config::byKey('max_account_number', __CLASS__); $i++) {
             if ($_id && $_id != $i)  continue;
-            $email = config::byKey('email', __CLASS__, '')[$i];
-            if (config::byKey('token', __CLASS__, array(1 => ''))[$i] == '') {
+            $tokens = config::byKey('token', __CLASS__, array());
+            if (empty($tokens[$i])) {
                 self::login($i);
+                $tokens = config::byKey('token', __CLASS__, array());
             }
-            log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__));
-            if ($email == '' || config::byKey('password', __CLASS__, '')[$i] == '') {
-                throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
-            }
-            $cmd[$i] = ' --username ' . $email;
-            $cmd[$i] .= ' get_master_token';
-
-            $return[$i] = self::sendCmdAndFormatResult($cmd[$i]);
-            if (isset($return[$i]['result'])) {
-                log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Jeton récupéré ', __FILE__). $return[$i]['result']['token']);
-                $token = array($i => $return[$i]['result']['token']) + config::byKey('token', __CLASS__, array(1 => ''));
-                config::save('token', $token, __CLASS__);
-            }
+            $return[$i] = $tokens[$i] ?? '';
         }
         return $return;
     }
@@ -248,21 +237,20 @@ class gkeep extends eqLogic
     public static function addNote($_object, $_account)
     {
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' ' . $_account . ' ' . json_encode($_object));
-        $cmd = ' --username ' . $_account;
-        $cmd .= ' --token "' . gkeep::getTokenByUsername($_account) . '"';
-        $cmd .= ' create_note';
-        $cmd .= isset($_object['text']) ? ' --text "' . str_replace('"', '\"', $_object['text']) . '"' : '';
-        $cmd .= isset($_object['title']) ? ' --title "' . $_object['title'] . '"' : '';
-        $cmd .= isset($_object['color']) ? ' --color "' . $_object['color'] . '"' : '';
-        $cmd .= isset($_object['labels']) ? ' --labels "' . $_object['labels'] . '"' : '';
-        $cmd .= isset($_object['archived']) ? ($_object['archived'] ? ' --archived' : ' --unarchived') : '';
-        $cmd .= isset($_object['pinned']) ? ($_object['pinned'] ? ' --pinned' : ' --unpinned') : '';
-        $cmd .= isset($_object['annotations']) ? ' --annotations "' . $_object['annotations'] . '"' : '';
-        $cmd .= isset($_object['collaborators']) ? ' --collaborators "' . $_object['collaborators'] . '"' : '';
+        $cmd = array('--username', (string) $_account, '--token', (string) gkeep::getTokenByUsername($_account), 'create_note');
+        foreach (array('text', 'title', 'color', 'labels', 'annotations', 'collaborators') as $option) {
+            if (isset($_object[$option])) {
+                $cmd[] = '--' . $option;
+                $cmd[] = is_scalar($_object[$option]) ? (string) $_object[$option] : json_encode($_object[$option], JSON_UNESCAPED_UNICODE);
+            }
+        }
+        if (isset($_object['archived'])) $cmd[] = $_object['archived'] ? '--archived' : '--unarchived';
+        if (isset($_object['pinned'])) $cmd[] = $_object['pinned'] ? '--pinned' : '--unpinned';
         if (isset($_object['list']) && is_array($_object['list'])) {
-            $cmd .= ' --list';
+            $cmd[] = '--list';
             foreach ($_object['list'] as $list) {
-                $cmd .= ' "'.str_replace('"', '', json_encode($list[1], JSON_UNESCAPED_UNICODE)).','.($list[0]?'True':'False').'"';
+                if (!is_array($list) || !array_key_exists(0, $list) || !array_key_exists(1, $list)) continue;
+                $cmd[] = str_replace(',', ' ', (string) $list[1]) . ',' . ($list[0] ? 'True' : 'False');
             }
         }
         $return = self::sendCmdAndFormatResult($cmd);
@@ -291,10 +279,11 @@ class gkeep extends eqLogic
             if ($email == '') {
                 throw new Exception(__('Veuillez renseignez un identifiant et un mot de passe de connexion.', __FILE__));
             }
-            $cmd = ' --username ' . $email;
-            $cmd .= ' --token "' . config::byKey('token', __CLASS__, array(1 => ''))[$i] . '"';
-            $cmd .= ' get_notes';
-            $cmd .= ($_id?' --note_id "' . $_id . '"':'');
+            $cmd = array('--username', (string) $email, '--token', (string) config::byKey('token', __CLASS__, array(1 => ''))[$i], 'get_notes');
+            if ($_id) {
+                $cmd[] = '--note_id';
+                $cmd[] = (string) $_id;
+            }
 
             $return = self::sendCmdAndFormatResult($cmd);
             $result = array();
@@ -646,46 +635,54 @@ class gkeep extends eqLogic
     /**
      * Exécute une commande en utilisant sudo et le chemin Python spécifié.
      *
-     * @param string $command La commande à exécuter.
+     * @param array $command Les arguments à transmettre au script.
      *
      * @return string Le résultat de la commande.
      *
      * @throws Exception En cas d'erreur lors de l'exécution de la commande.
      */
-    private function executeCommand($_command)
+    private static function executeCommand(array $_command)
     {
-        $cmd = system::getCmdSudo() . self::getPythonPath() . ' ' . dirname(__FILE__) . '/../../resources/gkeepmanager.py ' . $_command;
-        log::add(__CLASS__, 'debug', __('Commande envoyée : ', __FILE__) . $cmd);
+        $parts = array(
+            escapeshellarg(self::getPythonPath()),
+            escapeshellarg(dirname(__FILE__) . '/../../resources/gkeepmanager.py')
+        );
+        foreach ($_command as $argument) {
+            if (!is_scalar($argument) || strlen((string) $argument) > 65535 || strpos((string) $argument, "\0") !== false) {
+                throw new InvalidArgumentException(__('Argument GKeep invalide', __FILE__));
+            }
+            $parts[] = escapeshellarg((string) $argument);
+        }
+        $cmd = system::getCmdSudo() . implode(' ', $parts);
+        log::add(__CLASS__, 'debug', __('Exécution de la commande GKeep', __FILE__));
 
         exec($cmd . ' 2>&1', $output, $return_value);
         $result = implode("\n", $output);
-
-        log::add(__CLASS__, 'debug', 'Résultat brut ' . $result);
+        if ($return_value !== 0) {
+            log::add(__CLASS__, 'warning', __('La commande GKeep a retourné le code ', __FILE__) . $return_value);
+        }
         return $result;
     }
 
     /**
      * Envoie une commande et formate le résultat.
      *
-     * @param string $cmd La commande à envoyer.
+     * @param array $cmd Les arguments à envoyer.
      *
      * @return array Le résultat de la commande formaté.
      */
-    public function sendCmdAndFormatResult($cmd)
+    public static function sendCmdAndFormatResult(array $cmd)
     {
         $result = self::executeCommand($cmd);
-        log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Résultat brut ', __FILE__) . $result);
         $result_json = json_decode($result,true);
-        log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat array ', __FILE__) . json_encode($result_json));
         if (is_array($result_json) && isset($result_json['code'])) {
             if ($result_json['code'] !== 0) {
-                log::add(__CLASS__, 'warning',__('Erreur lors de l\'exécution de la commande : ', __FILE__) . $cmd);
+                log::add(__CLASS__, 'warning', __('Erreur GKeep : ', __FILE__) . ($result_json['message'] ?? $result_json['code']));
             }
-           log::add(__CLASS__, 'info', __FUNCTION__ . ' : ' . __('Résultat code ', __FILE__) . json_encode($result_json));
             return $result_json;
-        } else {
-            log::add(__CLASS__, 'warning',__('Erreur lors de l\'exécution de la commande : ', __FILE__) . $cmd);
         }
+        log::add(__CLASS__, 'warning', __('Réponse GKeep invalide', __FILE__));
+        return array('code' => -1, 'message' => __('Réponse GKeep invalide', __FILE__));
     }
 
     /**
@@ -829,12 +826,10 @@ class gkeep extends eqLogic
                 $_action = 'restore_note';
                 break;
             default:
-                log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('Commande inexistante ', __FILE__) . $_action);
+				throw new InvalidArgumentException(__('Commande inexistante ', __FILE__) . $_action);
         }
-        $cmd = ' --username ' . $this->getConfiguration('account');
-        $cmd .= ' --token "' . gkeep::getTokenByUsername($this->getConfiguration('account')) . '"';
-        $cmd .= ' ' . $_action;
-        $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
+        $account = (string) $this->getConfiguration('account');
+        $cmd = array('--username', $account, '--token', (string) gkeep::getTokenByUsername($account), $_action, '--note_id', (string) $this->getLogicalId());
         $return = self::sendCmdAndFormatResult($cmd);
         $this->refresh();
         return $return;
@@ -851,13 +846,13 @@ class gkeep extends eqLogic
     public function checkItem($_itemId, $_change)
     {
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' ' . $_itemId . ' ' . json_encode($_change));
-        $cmd = ' --username ' . $this->getConfiguration('account');
-        $cmd .= ' --token "' . gkeep::getTokenByUsername($this->getConfiguration('account')) . '"';
-        $cmd .= ' modify_item';
-        $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
-        $cmd .= ' --item_id "' . $_itemId . '"';
-        $cmd .= isset($_change['checked']) ? ($_change['checked'] == "true" ? ' --checked' : ' --unchecked') : '';
-        $cmd .= isset($_change['text']) ? ' --text "' . str_replace('"', '\"', $_change['text']) . '"' : '';
+        $account = (string) $this->getConfiguration('account');
+        $cmd = array('--username', $account, '--token', (string) gkeep::getTokenByUsername($account), 'modify_item', '--note_id', (string) $this->getLogicalId(), '--item_id', (string) $_itemId);
+        if (isset($_change['checked'])) $cmd[] = $_change['checked'] == 'true' ? '--checked' : '--unchecked';
+        if (isset($_change['text'])) {
+            $cmd[] = '--text';
+            $cmd[] = (string) $_change['text'];
+        }
         $return = self::sendCmdAndFormatResult($cmd);
         $this->refresh();
         return $return;
@@ -873,12 +868,12 @@ class gkeep extends eqLogic
     public function addItem($_change)
     {
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' ' . json_encode($_change));
-        $cmd = ' --username ' . $this->getConfiguration('account');
-        $cmd .= ' --token "' . gkeep::getTokenByUsername($this->getConfiguration('account')) . '"';
-        $cmd .= ' add_item';
-        $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
-        $cmd .= isset($_change['text']) ? ' --text "' . str_replace('"', '\"', $_change['text']) . '"' : '';
-        log::add(__CLASS__, 'debug', __("Valeur à envoyer addItem ", __FILE__) . json_encode($cmd));
+        $account = (string) $this->getConfiguration('account');
+        $cmd = array('--username', $account, '--token', (string) gkeep::getTokenByUsername($account), 'add_item', '--note_id', (string) $this->getLogicalId());
+        if (isset($_change['text'])) {
+            $cmd[] = '--text';
+            $cmd[] = (string) $_change['text'];
+        }
         $return = self::sendCmdAndFormatResult($cmd);
         $this->refresh();
         return $return;
@@ -894,11 +889,8 @@ class gkeep extends eqLogic
     public function deleteItem($_itemId)
     {
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' ' . $_itemId);
-        $cmd = ' --username ' . $this->getConfiguration('account');
-        $cmd .= ' --token "' . gkeep::getTokenByUsername($this->getConfiguration('account')) . '"';
-        $cmd .= ' delete_item';
-        $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
-        $cmd .= ' --item_id "' . $_itemId . '"';
+        $account = (string) $this->getConfiguration('account');
+        $cmd = array('--username', $account, '--token', (string) gkeep::getTokenByUsername($account), 'delete_item', '--note_id', (string) $this->getLogicalId(), '--item_id', (string) $_itemId);
         $return = self::sendCmdAndFormatResult($cmd);
         $this->refresh();
         return $return;
@@ -913,17 +905,14 @@ class gkeep extends eqLogic
      */
     public function updateNote($_change)
     {
-        log::add(__CLASS__, 'debug', __FUNCTION__ . ' ' . json_encode($_object));
-        $cmd = ' --username ' . $this->getConfiguration('account');
-        $cmd .= ' --token "' . gkeep::getTokenByUsername($this->getConfiguration('account')) . '"';
-        $cmd .= ' modify_note';
-        $cmd .= ' --note_id "' . $this->getLogicalId() . '"';
-        $cmd .= isset($_change['text']) ? ' --text "' . str_replace('"', '\"', $_change['text']) . '"' : '';
-        $cmd .= isset($_change['title']) ? ' --title "' . $_change['title'] . '"' : '';
-        $cmd .= isset($_change['color']) ? ' --color "' . $_change['color'] . '"' : '';
-        $cmd .= isset($_change['labels']) ? ' --labels "' . $_change['labels'] . '"' : '';
-        $cmd .= isset($_change['annotations']) ? ' --annotations "' . $_change['annotations'] . '"' : '';
-        $cmd .= isset($_change['collaborators']) ? ' --collaborators "' . $_change['collaborators'] . '"' : '';
+        $account = (string) $this->getConfiguration('account');
+        $cmd = array('--username', $account, '--token', (string) gkeep::getTokenByUsername($account), 'modify_note', '--note_id', (string) $this->getLogicalId());
+        foreach (array('text', 'title', 'color', 'labels', 'annotations', 'collaborators') as $option) {
+            if (isset($_change[$option])) {
+                $cmd[] = '--' . $option;
+                $cmd[] = is_scalar($_change[$option]) ? (string) $_change[$option] : json_encode($_change[$option], JSON_UNESCAPED_UNICODE);
+            }
+        }
         $return = self::sendCmdAndFormatResult($cmd);
         $this->refresh();
         return $return;
