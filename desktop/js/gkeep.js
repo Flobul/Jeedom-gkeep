@@ -173,7 +173,7 @@ function updateDisplayCard(_card, _eq) {
 	if (cardStatus) cardStatus.innerHTML = asCard;
 
 	_card.querySelector('.eqLogicAction[data-action="confEq"]')?.addEventListener('click', function() {
-		jeeDialog.dialog({id: 'md_modal', title: '{{Configuration avancée}}', contentUrl: 'index.php?v=d&modal=eqLogic.configure&eqLogic_id=' + _eq.id});
+		jeeDialog.dialog({id: 'md_gkeepEqLogicConfigure', title: '{{Configuration avancée}}', contentUrl: 'index.php?v=d&modal=eqLogic.configure&eqLogic_id=' + encodeURIComponent(_eq.id)});
 	});
 }
 
@@ -247,7 +247,7 @@ asCardHelper = function(_eq, _item, _name, _unname, aClass, unaClass) {
 }
 
 document.getElementById('bt_healthgkeep')?.addEventListener('click', function() {
-  jeeDialog.dialog({id: 'md_modal', title: '{{Santé Google Keep}}', contentUrl: 'index.php?v=d&plugin=gkeep&modal=health'});
+  jeeDialog.dialog({id: 'md_gkeepHealth', title: '{{Santé Google Keep}}', contentUrl: 'index.php?v=d&plugin=gkeep&modal=health'});
 });
 
 document.getElementById('bt_documentationgkeep')?.addEventListener('click', function() {
@@ -287,7 +287,7 @@ function printEqLogic(_eqLogic) {
 }
 
 document.getElementById('bt_addgkeep')?.addEventListener('click', function() {
-  jeeDialog.dialog({id: 'md_modal', title: '{{Ajouter une note Google Keep}}', contentUrl: 'index.php?v=d&plugin=gkeep&modal=addNote'});
+  jeeDialog.dialog({id: 'md_gkeepAddNote', title: '{{Ajouter une note Google Keep}}', contentUrl: 'index.php?v=d&plugin=gkeep&modal=addNote'});
 });
 
 document.getElementById('bt_synchronizegkeep')?.addEventListener('click', function() {

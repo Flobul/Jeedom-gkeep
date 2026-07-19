@@ -125,7 +125,7 @@
                 <sup><i class="fas fa-question-circle" title="{{Entrez le mot de passe.}}"></i></sup>
             </label>
             <div class="input-group col-sm-6">
-                <input type="password" class="inputPassword configKey form-control" data-l1key="password" data-l2key="<?php echo $i ?>" placeholder="password">
+                <input type="text" class="inputPassword configKey form-control" data-l1key="password" data-l2key="<?php echo $i ?>" placeholder="password">
                 <span class="input-group-btn">
                     <a class="btn btn-default form-control bt_showPass roundedRight"><i class="fas fa-eye"></i></a>
                 </span>
