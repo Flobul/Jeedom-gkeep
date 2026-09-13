@@ -53,6 +53,10 @@ document.querySelectorAll('.bt_getCredentials').forEach(button => {
           });
           return;
         }
+        if (data.result[credential] && data.result[credential].code != 0) {
+          jeedomUtils.showAlert({message: data.result[credential].message || '{{Authentification refusée. Utilisez la connexion avec navigateur.}}', level: 'danger'});
+          return;
+        }
         if (data.result[credential] && data.result[credential].code == 0) {
           jeedomUtils.showAlert({
             message: '{{Authentification réussie.}}',
@@ -63,3 +67,11 @@ document.querySelectorAll('.bt_getCredentials').forEach(button => {
     });
   });
 });
+
+ document.querySelectorAll('.gkeep-browser-login').forEach(button=>button.addEventListener('click',async()=>{
+  const group=button.closest('.gkeep-browser-auth'),cookie=group.querySelector('.gkeep-oauth-cookie'),output=group.querySelector('.gkeep-browser-result');
+  button.disabled=true;output.textContent='{{Connexion en cours…}}';
+  const body=new URLSearchParams({action:'loginBrowser',id:group.dataset.account,oauth_token:cookie.value,android_id:group.querySelector('.gkeep-android-id').value});cookie.value='';
+  try{const response=await fetch('plugins/gkeep/core/ajax/gkeep.ajax.php',{method:'POST',body});const result=await response.json();if(result.state!=='ok')throw new Error(result.result);output.textContent='{{Connexion enregistrée. Rechargez la page avant de sauvegarder à nouveau la configuration, puis lancez la synchronisation.}}';}
+  catch(error){output.textContent=error.message;}finally{button.disabled=false;}
+ }));

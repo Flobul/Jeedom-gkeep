@@ -57,19 +57,25 @@ class GoogleKeepManager:
         self.token = token
 
     def get_master_token(self, username, password, valOnly = False):
-        keep = gkeepapi.Keep()
-        success = keep.login(self.username, password)
-
-        if success:
+        try:
+            keep = gkeepapi.Keep()
+            if not keep.login(username, password):
+                raise ValueError('login refused')
             master_token = keep.getMasterToken()
             if valOnly:
                 print(master_token)
             else:
-                result = {"username": username, "token": master_token}
-                print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_CREATED, "result": result}))
-        else:
-            print(json.dumps({"code": self.CODE_ERROR, "message": self.MSG_FAILED_SAVE_MASTER_TOKEN}))
+                print(json.dumps({"code": self.CODE_SUCCESS, "message": self.MSG_MASTER_TOKEN_CREATED, "result": {"username": username, "token": master_token}}))
+        except Exception:
+            print(json.dumps({"code": self.CODE_ERROR, "message": "Connexion par mot de passe refusée. Utilisez la connexion Google avec navigateur dans la configuration du plugin."}))
             return False
+
+    @staticmethod
+    def authenticate(keep, username, token):
+        if hasattr(keep, 'authenticate'):
+            keep.authenticate(username, token)
+            return True
+        return keep.resume(username, token)
 
     def detect_file_type(self, file_path):
         file_signatures = {
@@ -177,7 +183,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 if note_id:
@@ -277,7 +283,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 if list_items is not None:
@@ -326,7 +332,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnotes = keep.find(
@@ -389,7 +395,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -407,7 +413,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -425,7 +431,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -443,7 +449,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -461,7 +467,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -479,7 +485,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -497,7 +503,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -528,7 +534,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -549,7 +555,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -579,7 +585,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 gnote = keep.get(note_id)
@@ -604,7 +610,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 if name is not None:
@@ -654,7 +660,7 @@ class GoogleKeepManager:
         master_token = self.token
         if master_token:
             keep = gkeepapi.Keep()
-            success = keep.resume(self.username, master_token)
+            success = self.authenticate(keep, self.username, master_token)
 
             if success:
                 label = keep.findLabel(name, create=True)

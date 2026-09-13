@@ -28,7 +28,7 @@ class gkeep extends eqLogic
      *
      * @var string
      */
-    public static $_pluginVersion = '1.00';
+    public static $_pluginVersion = '1.01';
 
     /**
      * Tableau des templates.
@@ -186,6 +186,27 @@ class gkeep extends eqLogic
      *
      * @return bool True si la connexion est réussie, sinon False.
      */
+    public static function loginWithBrowser($_id, $_cookie, $_android)
+    {
+        $id = filter_var($_id, FILTER_VALIDATE_INT);
+        $emails = config::byKey('email', __CLASS__, array());
+        if (!$id || empty($emails[$id]) || strlen($_cookie)>16384 || !preg_match('/^[a-f0-9]{16}$/iD', $_android)) {
+            throw new InvalidArgumentException(__('Enregistrez le compte et renseignez un cookie OAuth et un Android ID de 16 caractères hexadécimaux.', __FILE__));
+        }
+        $process = proc_open(array(self::getPythonPath(), __DIR__ . '/../../resources/google_auth.py'),
+            array(0=>array('pipe','r'),1=>array('pipe','w'),2=>array('file','/dev/null','a')), $pipes);
+        if (!is_resource($process)) { throw new RuntimeException(__('Impossible de lancer l’authentification Google.', __FILE__)); }
+        fwrite($pipes[0], json_encode(array('email'=>$emails[$id], 'oauth_token'=>$_cookie, 'android_id'=>$_android)));
+        fclose($pipes[0]);
+        $output = stream_get_contents($pipes[1]); fclose($pipes[1]);
+        $code = proc_close($process);
+        $result = json_decode($output, true);
+        if ($code !== 0 || empty($result['token'])) { throw new RuntimeException(__('Authentification Google refusée ou indisponible. Vérifiez les dépendances et utilisez un cookie OAuth récent du bon compte.', __FILE__)); }
+        $tokens = config::byKey('token', __CLASS__, array());
+        $tokens[$id] = $result['token']; config::save('token', $tokens, __CLASS__);
+        return array('authenticated'=>true);
+    }
+
     public static function login($_id = null)
     {
         $cmd = array();

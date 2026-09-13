@@ -36,7 +36,10 @@
         "début": "début",
         "début ": "début ",
         "fin": "fin",
-        "Épingler la note": "Épingler la note"
+        "Épingler la note": "Épingler la note",
+        "Impossible de lancer l’authentification Google.": "Impossible de lancer l’authentification Google.",
+        "Enregistrez le compte et renseignez un cookie OAuth et un Android ID de 16 caractères hexadécimaux.": "Enregistrez le compte et renseignez un cookie OAuth et un Android ID de 16 caractères hexadécimaux.",
+        "Authentification Google refusée ou indisponible. Vérifiez les dépendances et utilisez un cookie OAuth récent du bon compte.": "Authentification Google refusée ou indisponible. Vérifiez les dépendances et utilisez un cookie OAuth récent du bon compte."
     },
     "plugins\/gkeep\/core\/class\/gkeep.display.php": {
         "ARCHIVÉ": "ARCHIVÉ",
@@ -77,7 +80,10 @@
         "Modifier": "Modifier"
     },
     "plugins\/gkeep\/desktop\/js\/configuration.js": {
-        "Sauvegarde de la configuration des logs dev effectuée": "Sauvegarde de la configuration des logs dev effectuée"
+        "Sauvegarde de la configuration des logs dev effectuée": "Sauvegarde de la configuration des logs dev effectuée",
+        "Authentification refusée. Utilisez la connexion avec navigateur.": "Authentification refusée. Utilisez la connexion avec navigateur.",
+        "Connexion en cours…": "Connexion en cours…",
+        "Connexion enregistrée. Rechargez la page avant de sauvegarder à nouveau la configuration, puis lancez la synchronisation.": "Connexion enregistrée. Rechargez la page avant de sauvegarder à nouveau la configuration, puis lancez la synchronisation."
     },
     "plugins\/gkeep\/desktop\/js\/gkeep.js": {
         "Afficher": "Afficher",
@@ -242,6 +248,12 @@
         "Toutes les minutes": "Toutes les minutes",
         "Version": "Version",
         "et à fournir les log dans les balises préformatées": "et à fournir les log dans les balises préformatées",
-        "sur le community": "sur le community"
+        "sur le community": "sur le community",
+        "Enregistrez l’adresse email, puis connectez-vous au même compte Google dans la page ci-dessous. Dans les outils de développement, Application \/ Cookies, copiez uniquement la valeur du cookie oauth_token.": "Enregistrez l’adresse email, puis connectez-vous au même compte Google dans la page ci-dessous. Dans les outils de développement, Application \/ Cookies, copiez uniquement la valeur du cookie oauth_token.",
+        "Valider la connexion Google": "Valider la connexion Google",
+        "Android ID : identifiant de 16 caractères hexadécimaux utilisé pour l’échange. Ne partagez jamais le cookie ni le master token.": "Android ID : identifiant de 16 caractères hexadécimaux utilisé pour l’échange. Ne partagez jamais le cookie ni le master token.",
+        "Ouvrir Google": "Ouvrir Google",
+        "Ancienne connexion par mot de passe": "Ancienne connexion par mot de passe",
+        "Connexion Google avec navigateur": "Connexion Google avec navigateur"
     }
 }

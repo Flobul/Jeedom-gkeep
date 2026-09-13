@@ -26,6 +26,10 @@ try {
 
 	ajax::init();
 
+    if (init('action') == 'loginBrowser') {
+        ajax::success(gkeep::loginWithBrowser(init('id'), (string) init('oauth_token'), (string) init('android_id')));
+    }
+
     if (init('action') == 'login') {
         $result = gkeep::login(init('id'));
         ajax::success($result);

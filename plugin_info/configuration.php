@@ -133,11 +133,23 @@
           </div>
 
           <div class="form-group">
-            <label class="col-sm-4 control-label"><strong> {{Première connexion}}</strong>
+            <label class="col-sm-4 control-label"><strong> {{Ancienne connexion par mot de passe}}</strong>
                 <sup><i class="fas fa-question-circle" title="{{Cliquez ici pour la première connexion.}}"></i></sup>
             </label>
             <div class="col-sm-6">
                <a data-credential="<?php echo $i ?>" class="btn btn-success bt_getCredentials" style="width:30px"><i class="fas fa-user-circle"></i>{{}}</a>
+            </div>
+          </div>
+          <div class="form-group gkeep-browser-auth" data-account="<?php echo $i ?>">
+            <label class="col-sm-4 control-label">{{Connexion Google avec navigateur}}</label>
+            <div class="col-sm-6">
+              <p>{{Enregistrez l’adresse email, puis connectez-vous au même compte Google dans la page ci-dessous. Dans les outils de développement, Application / Cookies, copiez uniquement la valeur du cookie oauth_token.}}</p>
+              <a href="https://accounts.google.com/EmbeddedSetup" target="_blank" rel="noopener noreferrer" class="btn btn-default">{{Ouvrir Google}}</a>
+              <input type="password" class="form-control gkeep-oauth-cookie" autocomplete="off" placeholder="oauth_token" aria-label="oauth_token">
+              <input type="text" class="form-control gkeep-android-id" value="0123456789abcdef" maxlength="16" aria-label="Android ID">
+              <p>{{Android ID : identifiant de 16 caractères hexadécimaux utilisé pour l’échange. Ne partagez jamais le cookie ni le master token.}}</p>
+              <button type="button" class="btn btn-success gkeep-browser-login">{{Valider la connexion Google}}</button>
+              <p class="gkeep-browser-result" role="status"></p>
             </div>
           </div>
           <?php if ($token[$i]) { ?>
