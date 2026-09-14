@@ -144,6 +144,7 @@
             <label class="col-sm-4 control-label">{{Connexion Google avec navigateur}}</label>
             <div class="col-sm-6">
               <p>{{Enregistrez l’adresse email, puis connectez-vous au même compte Google dans la page ci-dessous. Dans les outils de développement, Application / Cookies, copiez uniquement la valeur du cookie oauth_token.}}</p>
+              <p class="help-block">{{Après validation Google, la page peut rester sur un écran de chargement : n’attendez pas une redirection. Dans cet onglet Google, ouvrez F12 (Mac : Option + Commande + I), puis Application → Stockage → Cookies → https://accounts.google.com. Filtrez sur oauth_token et copiez uniquement sa Valeur. Si le cookie est absent, terminez le consentement Google ou recommencez le parcours ; le paramètre TL de l’adresse ne remplace pas ce cookie.}}</p>
               <a href="https://accounts.google.com/EmbeddedSetup" target="_blank" rel="noopener noreferrer" class="btn btn-default">{{Ouvrir Google}}</a>
               <input type="password" class="form-control gkeep-oauth-cookie" autocomplete="off" placeholder="oauth_token" aria-label="oauth_token">
               <input type="text" class="form-control gkeep-android-id" value="0123456789abcdef" maxlength="16" aria-label="Android ID">

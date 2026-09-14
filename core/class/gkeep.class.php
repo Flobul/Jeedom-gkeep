@@ -28,7 +28,7 @@ class gkeep extends eqLogic
      *
      * @var string
      */
-    public static $_pluginVersion = '1.01';
+    public static $_pluginVersion = '1.0.2';
 
     /**
      * Tableau des templates.
@@ -422,6 +422,22 @@ class gkeep extends eqLogic
      * @param string $_IP   IP relevée à la réception du buffer
      * @return object $Optoma Retourne l'équipement créé
      */
+    /** Noms compatibles avec les colonnes Jeedom UTF-8 limitées à trois octets. */
+    public static function equipmentNameFromTitle($title)
+    {
+        $name = preg_replace_callback('/[\x{10000}-\x{10FFFF}]/u', function ($match) {
+            $bytes = array_values(unpack('C*', $match[0]));
+            $codepoint = (($bytes[0] & 7) << 18) | (($bytes[1] & 63) << 12)
+                | (($bytes[2] & 63) << 6) | ($bytes[3] & 63);
+            // Conserver un repère distinct plutôt que supprimer les emojis.
+            return '[U+' . strtoupper(dechex($codepoint)) . ']';
+        }, (string) $title);
+        if ($name === null || trim($name) === '') {
+            return __('Sans titre', __FILE__);
+        }
+        return $name;
+    }
+
     public static function checkAndCreateEquipementAndCmd($_note, $_account = null)
     {
         log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__) . json_encode($_note));
@@ -432,7 +448,7 @@ class gkeep extends eqLogic
         $eqLogic = self::byLogicalId($_note['id'], __CLASS__);
         if (!is_object($eqLogic)) {
             $eqLogic = new gkeep();
-            $eqLogic->setName($_note['title']);
+            $eqLogic->setName(self::equipmentNameFromTitle($_note['title']));
             $eqLogic->setLogicalId($_note['id']);
             $eqLogic->setObject_id(null);
             $eqLogic->setEqType_name(__CLASS__);
@@ -488,11 +504,12 @@ class gkeep extends eqLogic
             $eqLogic->setConfiguration('updated', date('Y-m-d H:i:s', $_note['updated']));
         }
         $eqLogic->save();
-        log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__) . " save object" . count($_note['list']));
+        $listCount = isset($_note['list']) && is_array($_note['list']) ? count($_note['list']) : 0;
+        log::add(__CLASS__, 'debug', __FUNCTION__ . ' : ' . __('début', __FILE__) . " save object " . $listCount);
 
         // DEBUT des Listes
-        if (isset($_note['list']) && count($_note['list']) > 0) {
-            $nbList = count($_note['list']);
+        if ($listCount > 0) {
+            $nbList = $listCount;
             $uncheckedCmds = [];
             $checkedCmds = [];
 

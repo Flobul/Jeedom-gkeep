@@ -14,7 +14,7 @@
  * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
  */
 
-const installDate = document.getElementById('span_plugin_install_date');
+var installDate = document.getElementById('span_plugin_install_date');
 if (installDate) installDate.textContent = `v${version} (${installDate.textContent})`;
 
 document.querySelector('.bt_refreshPluginInfo')?.insertAdjacentHTML(
@@ -22,9 +22,9 @@ document.querySelector('.bt_refreshPluginInfo')?.insertAdjacentHTML(
   '<a class="btn btn-success btn-sm" target="_blank" rel="noopener noreferrer" href="https://market.jeedom.com/index.php?v=d&p=market_display&id=4423"><i class="fas fa-comment-dots"></i> {{Donner mon avis}}</a>'
 );
 
-const contactMode = document.querySelector('.configKey[data-l1key="mobileormail"]');
+var contactMode = document.querySelector('.configKey[data-l1key="mobileormail"]');
 function updateContactMode() {
-  const useMobile = contactMode?.value === '1';
+  var useMobile = contactMode?.value === '1';
   document.querySelectorAll('.configKey[data-l1key="idemail"]').forEach(element => element.style.display = useMobile ? 'none' : '');
   document.querySelectorAll('.configKey[data-l1key="idmobile"]').forEach(element => element.style.display = useMobile ? '' : 'none');
 }
