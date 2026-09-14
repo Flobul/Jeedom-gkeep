@@ -267,6 +267,7 @@
         "Adresse email": "E-Mail-Adresse",
         "Ancienne connexion par mot de passe": "Frühere Anmeldung per Passwort",
         "Android ID : identifiant de 16 caractères hexadécimaux utilisé pour l’échange. Ne partagez jamais le cookie ni le master token.": "Android-ID: Eine 16-stellige hexadezimale Kennung, die für den Datenaustausch verwendet wird. Geben Sie das Cookie und das Master-Token niemals weiter.",
+        "Après validation Google, la page peut rester sur un écran de chargement : n’attendez pas une redirection. Dans cet onglet Google, ouvrez F12 (Mac : Option + Commande + I), puis Application → Stockage → Cookies → https:\/\/accounts.google.com. Filtrez sur oauth_token et copiez uniquement sa Valeur. Si le cookie est absent, terminez le consentement Google ou recommencez le parcours ; le paramètre TL de l’adresse ne remplace pas ce cookie.": "Nach der Google-Validierung bleibt die Seite möglicherweise auf einem Ladebildschirm stehen: Warten Sie nicht auf eine Weiterleitung. Öffnen Sie in diesem Google-Tab F12 (Mac: Option + Befehl + I) und wählen Sie dann „Anwendung“ → „Speicher“ → „Cookies“ → „https:\/\/accounts.google.com“. Filtern Sie nach „oauth_token“ und kopieren Sie nur dessen Wert. Falls das Cookie fehlt, schließen Sie die Google-Einwilligung ab oder beginnen Sie den Vorgang erneut; der TL-Parameter in der Adresse ersetzt dieses Cookie nicht.",
         "Authentification": "Authentifizierung",
         "Branche": "Zweig",
         "Cliquez ici pour la première connexion.": "Klicken Sie hier für die erste Anmeldung.",

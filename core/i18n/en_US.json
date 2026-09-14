@@ -267,6 +267,7 @@
         "Adresse email": "Email address",
         "Ancienne connexion par mot de passe": "Old password-based login",
         "Android ID : identifiant de 16 caractères hexadécimaux utilisé pour l’échange. Ne partagez jamais le cookie ni le master token.": "Android ID: a 16-character hexadecimal identifier used for communication. Never share the cookie or the master token.",
+        "Après validation Google, la page peut rester sur un écran de chargement : n’attendez pas une redirection. Dans cet onglet Google, ouvrez F12 (Mac : Option + Commande + I), puis Application → Stockage → Cookies → https:\/\/accounts.google.com. Filtrez sur oauth_token et copiez uniquement sa Valeur. Si le cookie est absent, terminez le consentement Google ou recommencez le parcours ; le paramètre TL de l’adresse ne remplace pas ce cookie.": "After Google validation, the page may remain on a loading screen: do not wait for a redirect. In this Google tab, press F12 (Mac: Option + Command + I), then go to Developer Tools → Storage → Cookies → https:\/\/accounts.google.com. Filter for `oauth_token` and copy only its Value. If the cookie is missing, complete the Google consent process or start the flow over; the `TL` parameter in the URL does not replace this cookie.",
         "Authentification": "Authentication",
         "Branche": "Branch",
         "Cliquez ici pour la première connexion.": "Click here to log in for the first time.",
